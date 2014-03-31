@@ -1,0 +1,170 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    tools:context="ist.cmov.proj.bomberboy.ui.Main"
+    android:id="@+id/container">
+
+    <!-- The primary full-screen view. This can be replaced with whatever view
+         is needed to present your content, e.g. VideoView, SurfaceView,
+         TextureView, etc. -->
+
+    <!-- This FrameLayout insets its children based on system windows using
+         android:fitsSystemWindows. -->
+
+    <RelativeLayout
+        android:layout_width="1080px"
+        android:layout_height="1695px"
+        android:gravity="center"
+        android:id="@+id/window_nexus5">
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="250px"
+            android:gravity="top"
+            android:id="@+id/relativeLayout">
+
+            <TextView
+                android:layout_width="270px"
+                android:layout_height="match_parent"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Player Name"
+                android:id="@+id/playerName"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginLeft="0dp"
+                android:textColor="#000000"
+                android:gravity="center"
+                android:padding="20px" />
+
+            <TextView
+                android:layout_width="270px"
+                android:layout_height="match_parent"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Player Score"
+                android:id="@+id/playerScore"
+                android:layout_toRightOf="@+id/playerName"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginLeft="0dp"
+                android:layout_toEndOf="@+id/playerName"
+                android:textColor="#000000"
+                android:gravity="center"
+                android:padding="20px" />
+
+            <TextView
+                android:layout_width="270px"
+                android:layout_height="match_parent"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Time Left"
+                android:id="@+id/timeLeft"
+                android:layout_toRightOf="@+id/playerScore"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginLeft="0dp"
+                android:layout_toEndOf="@+id/playerScore"
+                android:textColor="#000000"
+                android:gravity="center"
+                android:padding="20px" />
+
+            <TextView
+                android:layout_width="270px"
+                android:layout_height="match_parent"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Number of Players"
+                android:id="@+id/numberPlayers"
+                android:layout_toRightOf="@+id/timeLeft"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginLeft="0dp"
+                android:layout_toEndOf="@+id/timeLeft"
+                android:textColor="#000000"
+                android:gravity="center"
+                android:padding="20px" />
+        </RelativeLayout>
+
+        <SurfaceView
+            android:layout_width="match_parent"
+            android:layout_height="1080px"
+            android:id="@+id/gameView"
+            android:layout_gravity="center"
+            android:layout_below="@+id/relativeLayout"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="365px"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/gameView">
+
+            <Button
+                android:layout_width="160px"
+                android:layout_height="160px"
+                android:text="A"
+                android:id="@+id/button_a"
+                android:layout_centerVertical="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="100px"
+                android:gravity="center"/>
+
+            <Button
+                android:layout_width="160px"
+                android:layout_height="160px"
+                android:text="B"
+                android:id="@+id/button_b"
+                android:layout_marginLeft="15px"
+                android:layout_alignTop="@+id/button_a"
+                android:layout_toRightOf="@+id/button_a" />
+
+            <Button
+                android:layout_width="140px"
+                android:layout_height="140px"
+                android:text="R"
+                android:id="@+id/button_r"
+                android:layout_marginRight="100px"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true" />
+
+            <Button
+                android:layout_width="140px"
+                android:layout_height="140px"
+                android:text="U"
+                android:id="@+id/button_u"
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@+id/button_r"
+                android:layout_marginTop="35px"
+                android:layout_marginRight="15px" />
+
+            <Button
+                android:layout_width="140px"
+                android:layout_height="140px"
+                android:text="D"
+                android:id="@+id/button_d"
+                android:layout_below="@+id/button_u"
+                android:layout_alignRight="@+id/button_u"
+                android:layout_alignEnd="@+id/button_u"
+                android:layout_marginTop="15px" />
+
+            <Button
+                android:layout_width="140px"
+                android:layout_height="140px"
+                android:text="L"
+                android:id="@+id/button_l"
+                android:layout_alignTop="@+id/button_r"
+                android:layout_toLeftOf="@+id/button_u"
+                android:layout_marginRight="15px" />
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</FrameLayout>
