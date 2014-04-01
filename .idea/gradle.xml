@@ -8,7 +8,6 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/status" />
             <option value="$PROJECT_DIR$/ui" />
           </set>
         </option>
