@@ -32,7 +32,7 @@ public class Main extends Activity {
     }
 
     private void getName() {
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        AlertDialog.Builder alert = new AlertDialog.Builder(this, AlertDialog.THEME_HOLO_LIGHT);
 
         alert.setTitle("Enter your name");
 
