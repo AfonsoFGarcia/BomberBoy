@@ -8,15 +8,15 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.view.SurfaceView;
 import android.view.View;
-import android.widget.Button;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import static java.lang.System.exit;
-
 import ist.cmov.proj.bomberboy.status.GameStatus;
 import ist.cmov.proj.bomberboy.status.Movements;
+
+import static java.lang.System.exit;
 
 public class Main extends Activity {
 
@@ -27,7 +27,7 @@ public class Main extends Activity {
 
     @SuppressWarnings("deprecation")
     private void draw() {
-        Bitmap bg = g.getBitmap(getApplicationContext());
+        Bitmap bg = g.getBitmap();
         game.setBackgroundDrawable(new BitmapDrawable(bg));
     }
 
@@ -64,7 +64,7 @@ public class Main extends Activity {
 
         setContentView(R.layout.activity_main);
         game = (SurfaceView) findViewById(R.id.gameView);
-        g = new GameStatus();
+        g = new GameStatus(getApplicationContext());
         draw();
 
         final Button button_a = (Button) findViewById(R.id.button_a);

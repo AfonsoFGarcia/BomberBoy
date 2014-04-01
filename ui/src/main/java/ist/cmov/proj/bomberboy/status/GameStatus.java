@@ -4,19 +4,27 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Rect;
+
+import java.util.HashMap;
 
 import ist.cmov.proj.bomberboy.ui.R;
 
 public class GameStatus {
 
+    protected HashMap<Types, Bitmap> bitmaps;
     private Types[][] t = null;
     private Integer LIMIT = null;
     private Pair p = null;
 
-    public GameStatus() {
+    public GameStatus(Context c) {
+        bitmaps = new HashMap<Types, Bitmap>();
+        bitmaps.put(Types.BARRIER, BitmapFactory.decodeResource(c.getResources(), R.drawable.barrier));
+        bitmaps.put(Types.BOMB, BitmapFactory.decodeResource(c.getResources(), R.drawable.bomb));
+        bitmaps.put(Types.PERSON, BitmapFactory.decodeResource(c.getResources(), R.drawable.person));
+        bitmaps.put(Types.WALL, BitmapFactory.decodeResource(c.getResources(), R.drawable.wall));
+        bitmaps.put(Types.NULL, BitmapFactory.decodeResource(c.getResources(), R.drawable.grass));
+
         Integer size = 20;
         t = new Types[size][size];
         for (int i = 0; i < size; i++) {
@@ -89,33 +97,22 @@ public class GameStatus {
         }
     }
 
-    public Bitmap getBitmap(Context c) {
+    public Bitmap getBitmap() {
         Bitmap bg = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bg);
         int bitSize = (150-5*(LIMIT+1))/2;
 
         for(int i = 0; i <= LIMIT; i++) {
             for(int j = 0; j <= LIMIT; j++) {
-                drawOnCanvas(t[i][j], canvas, i, j, bitSize, c);
+                drawOnCanvas(t[i][j], canvas, i, j, bitSize);
             }
         }
 
         return bg;
     }
 
-    private void drawOnCanvas(Types t, Canvas c, Integer x, Integer y, Integer bitSize, Context cont) {
-        Bitmap b = null;
-        if (t.equals(Types.BARRIER)) {
-            b = BitmapFactory.decodeResource(cont.getResources(), R.drawable.barrier);
-        } else if (t.equals(Types.BOMB)) {
-            b = BitmapFactory.decodeResource(cont.getResources(), R.drawable.bomb);
-        } else if (t.equals(Types.PERSON)) {
-            b = BitmapFactory.decodeResource(cont.getResources(), R.drawable.person);
-        } else if (t.equals(Types.WALL)) {
-            b = BitmapFactory.decodeResource(cont.getResources(), R.drawable.wall);
-        } else {
-            b = BitmapFactory.decodeResource(cont.getResources(), R.drawable.grass);
-        }
+    private void drawOnCanvas(Types t, Canvas c, Integer x, Integer y, Integer bitSize) {
+        Bitmap b = bitmaps.get(t);
         Rect rect = new Rect(bitSize * y, bitSize * x, bitSize * y + bitSize, bitSize * x + bitSize);
         c.drawBitmap(b, null, rect, null);
     }
