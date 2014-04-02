@@ -4,12 +4,8 @@ import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-/**
- * Created by agfrg on 02/04/14.
- */
 public class ReadMap {
     public static ArrayList<ArrayList<Types>> getMap(BufferedReader reader) {
         ArrayList<String> map = new ArrayList<String>();
@@ -20,6 +16,7 @@ public class ReadMap {
                 s = reader.readLine();
             }
         } catch (IOException e) {
+            Log.e("IOException", e.getMessage());
         }
 
         ArrayList<ArrayList<Types>> typeMap = new ArrayList<ArrayList<Types>>(GameStatus.SIZE);

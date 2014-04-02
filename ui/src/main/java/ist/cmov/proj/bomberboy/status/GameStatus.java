@@ -16,10 +16,9 @@ public class GameStatus {
     protected HashMap<Types, Bitmap> bitmaps;
     public static int SIZE = 19;
     private ArrayList<ArrayList<Types>> t;
-    private Integer LIMIT = SIZE - 1;
     private Pair p = null;
 
-    private GameStatus(Context c, Integer s) {
+    private void readBitmaps(Context c) {
         bitmaps = new HashMap<Types, Bitmap>();
         bitmaps.put(Types.BARRIER, BitmapFactory.decodeResource(c.getResources(), R.drawable.barrier));
         bitmaps.put(Types.BOMB, BitmapFactory.decodeResource(c.getResources(), R.drawable.bomb));
@@ -35,13 +34,13 @@ public class GameStatus {
     }
 
     public GameStatus(Context c, ArrayList<ArrayList<Types>> types) {
-        this(c, SIZE);
+        readBitmaps(c);
         t = types;
         createPlayer();
     }
 
     public GameStatus(Context c) {
-        this(c, SIZE);
+        readBitmaps(c);
         emptyMap();
         createPlayer();
     }
@@ -58,22 +57,22 @@ public class GameStatus {
     }
 
     private void setWalls() {
-        for (int i = 0; i <= LIMIT; i++) {
+        for (int i = 0; i < SIZE; i++) {
             t.get(i).add(0, Types.WALL);
             t.get(0).add(i, Types.WALL);
-            t.get(i).add(LIMIT, Types.WALL);
-            t.get(LIMIT).add(i, Types.WALL);
+            t.get(i).add(SIZE - 1, Types.WALL);
+            t.get(SIZE - 1).add(i, Types.WALL);
         }
     }
 
-    public boolean canMove(Movements e) {
-        if (e.equals(Movements.DOWN) && p.x < LIMIT && isNotOccupied(e)) {
+    private boolean canMove(Movements e) {
+        if (e.equals(Movements.DOWN) && p.x < SIZE - 1 && isNotOccupied(e)) {
             return true;
         } else if (e.equals(Movements.UP) && p.x > 0 && isNotOccupied(e)) {
             return true;
         } else if (e.equals(Movements.LEFT) && p.y > 0 && isNotOccupied(e)) {
             return true;
-        } else if (e.equals(Movements.RIGHT) && p.y < LIMIT && isNotOccupied(e)) {
+        } else if (e.equals(Movements.RIGHT) && p.y < SIZE - 1 && isNotOccupied(e)) {
             return true;
         } else {
             return false;
@@ -94,7 +93,8 @@ public class GameStatus {
         }
     }
 
-    public void move(Movements e) {
+    public boolean move(Movements e) {
+        if (!canMove(e)) return false;
         t.get(p.x).set(p.y, Types.NULL);
         if (e.equals(Movements.DOWN)) {
             p.incrX();
@@ -106,15 +106,16 @@ public class GameStatus {
             p.incrY();
         }
         t.get(p.x).set(p.y, Types.PERSON);
+        return true;
     }
 
     public Bitmap getBitmap() {
         Bitmap bg = Bitmap.createBitmap(475, 475, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bg);
-        int bitSize = (25*(LIMIT+1)-450);
+        int bitSize = (25*(SIZE)-450);
 
-        for(int i = 0; i <= LIMIT; i++) {
-            for(int j = 0; j <= LIMIT; j++) {
+        for(int i = 0; i < SIZE; i++) {
+            for(int j = 0; j < SIZE; j++) {
                 drawOnCanvas(t.get(i).get(j), canvas, i, j, bitSize);
             }
         }

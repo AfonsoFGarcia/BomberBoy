@@ -94,8 +94,7 @@ public class Main extends Activity {
         final Button button_u = (Button) findViewById(R.id.button_u);
         button_u.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if(g.canMove(Movements.UP)) {
-                    g.move(Movements.UP);
+                if(g.move(Movements.UP)) {
                     draw();
                 }
             }
@@ -104,8 +103,7 @@ public class Main extends Activity {
         final Button button_d = (Button) findViewById(R.id.button_d);
         button_d.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if(g.canMove(Movements.DOWN)) {
-                    g.move(Movements.DOWN);
+                if(g.move(Movements.DOWN)) {
                     draw();
                 }
             }
@@ -114,8 +112,7 @@ public class Main extends Activity {
         final Button button_l = (Button) findViewById(R.id.button_l);
         button_l.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if(g.canMove(Movements.LEFT)) {
-                    g.move(Movements.LEFT);
+                if(g.move(Movements.LEFT)) {
                     draw();
                 }
             }
@@ -124,8 +121,7 @@ public class Main extends Activity {
         final Button button_r = (Button) findViewById(R.id.button_r);
         button_r.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if(g.canMove(Movements.RIGHT)) {
-                    g.move(Movements.RIGHT);
+                if(g.move(Movements.RIGHT)) {
                     draw();
                 }
             }
