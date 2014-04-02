@@ -39,32 +39,6 @@ public class GameStatus {
         createPlayer();
     }
 
-    public GameStatus(Context c) {
-        readBitmaps(c);
-        emptyMap();
-        createPlayer();
-    }
-
-    private void emptyMap() {
-        t = new ArrayList<ArrayList<Types>>();
-        for (int i = 0; i < SIZE; i++) {
-            t.add(i, new ArrayList<Types>());
-            for (int j = 0; j < SIZE; j++) {
-                if(i != 1 && j != 1) t.get(i).add(j, Types.NULL);
-            }
-        }
-        setWalls();
-    }
-
-    private void setWalls() {
-        for (int i = 0; i < SIZE; i++) {
-            t.get(i).add(0, Types.WALL);
-            t.get(0).add(i, Types.WALL);
-            t.get(i).add(SIZE - 1, Types.WALL);
-            t.get(SIZE - 1).add(i, Types.WALL);
-        }
-    }
-
     private boolean canMove(Movements e) {
         if (e.equals(Movements.DOWN) && p.x < SIZE - 1 && isNotOccupied(e)) {
             return true;
@@ -112,6 +86,7 @@ public class GameStatus {
     public Bitmap getBitmap() {
         Bitmap bg = Bitmap.createBitmap(475, 475, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bg);
+        /* Represents a line equation that gets the size of the bitmap in the canvas in order to the size of the board */
         int bitSize = (25*(SIZE)-450);
 
         for(int i = 0; i < SIZE; i++) {
