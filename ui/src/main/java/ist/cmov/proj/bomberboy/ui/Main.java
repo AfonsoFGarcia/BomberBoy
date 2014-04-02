@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +14,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+
 import ist.cmov.proj.bomberboy.status.GameStatus;
 import ist.cmov.proj.bomberboy.status.Movements;
+import ist.cmov.proj.bomberboy.status.ReadMap;
+import ist.cmov.proj.bomberboy.status.Types;
 
 import static java.lang.System.exit;
 
@@ -64,7 +71,10 @@ public class Main extends Activity {
 
         setContentView(R.layout.activity_main);
         game = (SurfaceView) findViewById(R.id.gameView);
-        g = new GameStatus(getApplicationContext());
+        BufferedReader l = new BufferedReader(new InputStreamReader(getResources().openRawResource(R.raw.l1)));
+        ArrayList<ArrayList<Types>> m = ReadMap.getMap(l);
+        g = new GameStatus(getApplicationContext(), m);
+        Log.d("TEST", "oi");
         draw();
 
         final Button button_a = (Button) findViewById(R.id.button_a);
