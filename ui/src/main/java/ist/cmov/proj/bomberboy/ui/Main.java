@@ -72,7 +72,7 @@ public class Main extends Activity {
         setContentView(R.layout.activity_main);
         game = (SurfaceView) findViewById(R.id.gameView);
         BufferedReader l = new BufferedReader(new InputStreamReader(getResources().openRawResource(R.raw.l1)));
-        ArrayList<ArrayList<Types>> m = ReadMap.getMap(l);
+        Types[][] m = ReadMap.getMap(l);
         g = new GameStatus(getApplicationContext(), m);
         Log.d("TEST", "oi");
         draw();

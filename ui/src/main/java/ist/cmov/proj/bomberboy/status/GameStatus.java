@@ -15,7 +15,7 @@ public class GameStatus {
 
     protected HashMap<Types, Bitmap> bitmaps;
     public static int SIZE = 19;
-    private ArrayList<ArrayList<Types>> t;
+    private Types[][] t;
     private Pair p = null;
 
     private void readBitmaps(Context c) {
@@ -28,12 +28,11 @@ public class GameStatus {
     }
 
     private void createPlayer() {
-        t.get(1).remove(1);
-        t.get(1).add(1, Types.PERSON);
+        t[1][1] = Types.PERSON;
         p = new Pair(1, 1);
     }
 
-    public GameStatus(Context c, ArrayList<ArrayList<Types>> types) {
+    public GameStatus(Context c, Types[][] types) {
         readBitmaps(c);
         t = types;
         createPlayer();
@@ -54,13 +53,13 @@ public class GameStatus {
     }
 
     private boolean isNotOccupied(Movements e) {
-        if (e.equals(Movements.DOWN) && t.get(p.x + 1).get(p.y).equals(Types.NULL)) {
+        if (e.equals(Movements.DOWN) && t[p.x + 1][p.y].equals(Types.NULL)) {
             return true;
-        } else if (e.equals(Movements.UP) && t.get(p.x - 1).get(p.y).equals(Types.NULL)) {
+        } else if (e.equals(Movements.UP) && t[p.x - 1][p.y].equals(Types.NULL)) {
             return true;
-        } else if (e.equals(Movements.LEFT) && t.get(p.x).get(p.y - 1).equals(Types.NULL)) {
+        } else if (e.equals(Movements.LEFT) && t[p.x][p.y - 1].equals(Types.NULL)) {
             return true;
-        } else if (e.equals(Movements.RIGHT) && t.get(p.x).get(p.y + 1).equals(Types.NULL)) {
+        } else if (e.equals(Movements.RIGHT) && t[p.x][p.y + 1].equals(Types.NULL)) {
             return true;
         } else {
             return false;
@@ -69,7 +68,7 @@ public class GameStatus {
 
     public boolean move(Movements e) {
         if (!canMove(e)) return false;
-        t.get(p.x).set(p.y, Types.NULL);
+        t[p.x][p.y] = Types.NULL;
         if (e.equals(Movements.DOWN)) {
             p.incrX();
         } else if (e.equals(Movements.UP)) {
@@ -79,7 +78,7 @@ public class GameStatus {
         } else {
             p.incrY();
         }
-        t.get(p.x).set(p.y, Types.PERSON);
+        t[p.x][p.y] = Types.PERSON;
         return true;
     }
 
@@ -91,7 +90,7 @@ public class GameStatus {
 
         for(int i = 0; i < SIZE; i++) {
             for(int j = 0; j < SIZE; j++) {
-                drawOnCanvas(t.get(i).get(j), canvas, i, j, bitSize);
+                drawOnCanvas(t[i][j], canvas, i, j, bitSize);
             }
         }
 

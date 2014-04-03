@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class ReadMap {
-    public static ArrayList<ArrayList<Types>> getMap(BufferedReader reader) {
+    public static Types[][] getMap(BufferedReader reader) {
         ArrayList<String> map = new ArrayList<String>();
         try {
             String s = reader.readLine();
@@ -19,26 +19,25 @@ public class ReadMap {
             Log.e("IOException", e.getMessage());
         }
 
-        ArrayList<ArrayList<Types>> typeMap = new ArrayList<ArrayList<Types>>(GameStatus.SIZE);
+        Types[][] typeMap = new Types[GameStatus.SIZE][GameStatus.SIZE];
 
         for(int i = 0; i < map.size(); i++) {
-            parseString(map.get(i), typeMap, i);
+            parseString(map.get(i), typeMap[i]);
         }
         return typeMap;
     }
 
-    private static void parseString(String l, ArrayList<ArrayList<Types>> typeMap, int index) {
-        typeMap.add(index, new ArrayList<Types>(GameStatus.SIZE));
+    private static void parseString(String l, Types[] typeMap) {
         for(int i = 0; i < l.length(); i++) {
             char p = l.charAt(i);
             if (p == '-') {
-                typeMap.get(index).add(i, Types.NULL);
+                typeMap[i] = Types.NULL;
             } else if (p == 'W') {
-                typeMap.get(index).add(i, Types.WALL);
+                typeMap[i] = Types.WALL;
             } else if (p == 'O') {
-                typeMap.get(index).add(i, Types.BARRIER);
+                typeMap[i] = Types.BARRIER;
             } else if (p == 'R') {
-                typeMap.get(index).add(i, Types.ROBOT);
+                typeMap[i] = Types.ROBOT;
             }
         }
     }
