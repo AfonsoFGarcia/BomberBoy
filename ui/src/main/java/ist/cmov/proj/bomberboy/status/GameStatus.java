@@ -82,9 +82,7 @@ public class GameStatus {
         return true;
     }
 
-    public Bitmap getBitmap() {
-        Bitmap bg = Bitmap.createBitmap(475, 475, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bg);
+    public void setBitmap(Canvas canvas) {
         /* Represents a line equation that gets the size of the bitmap in the canvas in order to the size of the board */
         int bitSize = (25*(SIZE)-450);
 
@@ -93,8 +91,6 @@ public class GameStatus {
                 drawOnCanvas(t[i][j], canvas, i, j, bitSize);
             }
         }
-
-        return bg;
     }
 
     private void drawOnCanvas(Types t, Canvas c, Integer x, Integer y, Integer bitSize) {

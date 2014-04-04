@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,10 +32,12 @@ public class Main extends Activity {
     private boolean scalingComplete = false;
     private String playerName;
     private GameStatus g;
+    private Bitmap bg = Bitmap.createBitmap(475, 475, Bitmap.Config.ARGB_8888);
+    private Canvas canvas = new Canvas(bg);
 
     @SuppressWarnings("deprecation")
     private void draw() {
-        Bitmap bg = g.getBitmap();
+        g.setBitmap(canvas);
         game.setBackgroundDrawable(new BitmapDrawable(bg));
     }
 
