@@ -7,8 +7,8 @@
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
-            <option value="D:\My Documents\ist\Projects\AndroidStudio\BomberBoy" />
-            <option value="D:\My Documents\ist\Projects\AndroidStudio\BomberBoy\ui" />
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/ui" />
           </set>
         </option>
       </GradleProjectSettings>

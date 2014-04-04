@@ -7,7 +7,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +16,6 @@ import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 
 import ist.cmov.proj.bomberboy.status.GameStatus;
 import ist.cmov.proj.bomberboy.status.Movements;
@@ -37,7 +35,6 @@ public class Main extends Activity {
 
     @SuppressWarnings("deprecation")
     private void draw() {
-        g.setBitmap(canvas);
         game.setBackgroundDrawable(new BitmapDrawable(bg));
     }
 
@@ -77,7 +74,7 @@ public class Main extends Activity {
         BufferedReader l = new BufferedReader(new InputStreamReader(getResources().openRawResource(R.raw.l1)));
         Types[][] m = ReadMap.getMap(l);
         g = new GameStatus(getApplicationContext(), m);
-        Log.d("TEST", "oi");
+        g.setBitmap(canvas);
         draw();
 
         final Button button_a = (Button) findViewById(R.id.button_a);
@@ -97,7 +94,7 @@ public class Main extends Activity {
         final Button button_u = (Button) findViewById(R.id.button_u);
         button_u.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if(g.move(Movements.UP)) {
+                if (g.move(Movements.UP, canvas)) {
                     draw();
                 }
             }
@@ -106,7 +103,7 @@ public class Main extends Activity {
         final Button button_d = (Button) findViewById(R.id.button_d);
         button_d.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if(g.move(Movements.DOWN)) {
+                if (g.move(Movements.DOWN, canvas)) {
                     draw();
                 }
             }
@@ -115,7 +112,7 @@ public class Main extends Activity {
         final Button button_l = (Button) findViewById(R.id.button_l);
         button_l.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if(g.move(Movements.LEFT)) {
+                if (g.move(Movements.LEFT, canvas)) {
                     draw();
                 }
             }
@@ -124,7 +121,7 @@ public class Main extends Activity {
         final Button button_r = (Button) findViewById(R.id.button_r);
         button_r.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if(g.move(Movements.RIGHT)) {
+                if (g.move(Movements.RIGHT, canvas)) {
                     draw();
                 }
             }

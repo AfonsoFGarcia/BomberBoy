@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import ist.cmov.proj.bomberboy.ui.R;
@@ -17,6 +16,9 @@ public class GameStatus {
     public static int SIZE = 19;
     private Types[][] t;
     private Pair p = null;
+
+    /* Represents a line equation that gets the size of the bitmap in the canvas in order to the size of the board */
+    int bitSize = (25 * (SIZE) - 450);
 
     private void readBitmaps(Context c) {
         bitmaps = new HashMap<Types, Bitmap>();
@@ -66,9 +68,10 @@ public class GameStatus {
         }
     }
 
-    public boolean move(Movements e) {
+    public boolean move(Movements e, Canvas canvas) {
         if (!canMove(e)) return false;
         t[p.x][p.y] = Types.NULL;
+        drawOnCanvas(t[p.x][p.y], canvas, p.x, p.y);
         if (e.equals(Movements.DOWN)) {
             p.incrX();
         } else if (e.equals(Movements.UP)) {
@@ -79,21 +82,19 @@ public class GameStatus {
             p.incrY();
         }
         t[p.x][p.y] = Types.PERSON;
+        drawOnCanvas(t[p.x][p.y], canvas, p.x, p.y);
         return true;
     }
 
     public void setBitmap(Canvas canvas) {
-        /* Represents a line equation that gets the size of the bitmap in the canvas in order to the size of the board */
-        int bitSize = (25*(SIZE)-450);
-
         for(int i = 0; i < SIZE; i++) {
             for(int j = 0; j < SIZE; j++) {
-                drawOnCanvas(t[i][j], canvas, i, j, bitSize);
+                drawOnCanvas(t[i][j], canvas, i, j);
             }
         }
     }
 
-    private void drawOnCanvas(Types t, Canvas c, Integer x, Integer y, Integer bitSize) {
+    private void drawOnCanvas(Types t, Canvas c, Integer x, Integer y) {
         Bitmap b = bitmaps.get(t);
         Rect rect = new Rect(bitSize * y, bitSize * x, bitSize * y + bitSize, bitSize * x + bitSize);
         c.drawBitmap(b, null, rect, null);
