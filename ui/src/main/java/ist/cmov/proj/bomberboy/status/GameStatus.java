@@ -1,7 +1,5 @@
 package ist.cmov.proj.bomberboy.status;
 
-import android.graphics.Canvas;
-
 public class GameStatus {
 
     public static int SIZE = 19;
@@ -37,22 +35,32 @@ public class GameStatus {
     }
 
     private boolean isNotOccupied(Movements e) {
-        if (e.equals(Movements.DOWN) && t[p.x + 1][p.y].equals(Types.NULL)) {
+        if (e.equals(Movements.DOWN) && emptyPosition(p.x + 1, p.y)) {
             return true;
-        } else if (e.equals(Movements.UP) && t[p.x - 1][p.y].equals(Types.NULL)) {
+        } else if (e.equals(Movements.UP) && emptyPosition(p.x - 1, p.y)) {
             return true;
-        } else if (e.equals(Movements.LEFT) && t[p.x][p.y - 1].equals(Types.NULL)) {
+        } else if (e.equals(Movements.LEFT) && emptyPosition(p.x, p.y - 1)) {
             return true;
-        } else if (e.equals(Movements.RIGHT) && t[p.x][p.y + 1].equals(Types.NULL)) {
+        } else if (e.equals(Movements.RIGHT) && emptyPosition(p.x, p.y + 1)) {
             return true;
         } else {
             return false;
         }
     }
 
-    public boolean move(Movements e, Canvas canvas) {
+    private boolean emptyPosition(int x, int y) {
+        return t[x][y].equals(Types.NULL);
+    }
+
+    public boolean move(Movements e) {
         if (!canMove(e)) return false;
-        t[p.x][p.y] = Types.NULL;
+
+        if (t[p.x][p.y].equals(Types.PERSONANDBOMB)) {
+            t[p.x][p.y] = Types.BOMB;
+        } else {
+            t[p.x][p.y] = Types.NULL;
+        }
+
         if (e.equals(Movements.DOWN)) {
             p.incrX();
         } else if (e.equals(Movements.UP)) {
@@ -62,7 +70,19 @@ public class GameStatus {
         } else {
             p.incrY();
         }
-        t[p.x][p.y] = Types.PERSON;
+
+        if (t[p.x][p.y].equals(Types.BOMB)) {
+            t[p.x][p.y] = Types.PERSONANDBOMB;
+        } else {
+            t[p.x][p.y] = Types.PERSON;
+        }
+
+
+        return true;
+    }
+
+    public boolean dropBomb() {
+        t[p.x][p.y] = Types.PERSONANDBOMB;
         return true;
     }
 }

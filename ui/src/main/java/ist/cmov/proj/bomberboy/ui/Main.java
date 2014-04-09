@@ -34,8 +34,9 @@ public class Main extends Activity {
     private Bitmap bg = Bitmap.createBitmap(475, 475, Bitmap.Config.ARGB_8888);
     private Canvas canvas = new Canvas(bg);
     protected HashMap<Types, Bitmap> bitmaps;
-    private static int SIZE;
-    private int bitSize;
+    private static int SIZE = GameStatus.SIZE;
+    /* Represents a line equation that gets the size of the bitmap in the canvas in order to the size of the board */
+    private int bitSize = (25 * (SIZE) - 450);
 
     @SuppressWarnings("deprecation")
     private void draw() {
@@ -44,9 +45,13 @@ public class Main extends Activity {
     }
 
     private void getName() {
+        getName("Enter your name");
+    }
+
+    private void getName(String title) {
         AlertDialog.Builder alert = new AlertDialog.Builder(this, AlertDialog.THEME_HOLO_LIGHT);
 
-        alert.setTitle("Enter your name");
+        alert.setTitle(title);
 
         // Set an EditText view to get user input
         final EditText input = new EditText(this);
@@ -56,7 +61,7 @@ public class Main extends Activity {
             public void onClick(DialogInterface dialog, int whichButton) {
                 //noinspection ConstantConditions
                 playerName = input.getText().toString();
-                if (playerName.equals("")) getName();
+                if (playerName.equals("")) getName("Enter a valid name");
                 TextView player = (TextView) findViewById(R.id.playerName);
                 player.setText(playerName);
             }
@@ -75,16 +80,14 @@ public class Main extends Activity {
         bitmaps.put(Types.PERSON, BitmapFactory.decodeResource(getResources(), R.drawable.person));
         bitmaps.put(Types.WALL, BitmapFactory.decodeResource(getResources(), R.drawable.wall));
         bitmaps.put(Types.NULL, BitmapFactory.decodeResource(getResources(), R.drawable.grass));
+        bitmaps.put(Types.PERSONANDBOMB, bitmaps.get(Types.PERSON));
 
         setContentView(R.layout.activity_main);
         game = (SurfaceView) findViewById(R.id.gameView);
         BufferedReader l = new BufferedReader(new InputStreamReader(getResources().openRawResource(R.raw.l1)));
         Types[][] m = ReadMap.getMap(l);
         g = new GameStatus(m);
-        SIZE = GameStatus.SIZE;
 
-        /* Represents a line equation that gets the size of the bitmap in the canvas in order to the size of the board */
-        bitSize = (25 * (SIZE) - 450);
 
         setBitmap(g.getMap());
         draw();
@@ -92,7 +95,9 @@ public class Main extends Activity {
         final Button button_a = (Button) findViewById(R.id.button_a);
         button_a.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                draw();
+                if (g.dropBomb()) {
+                    draw();
+                }
             }
         });
 
@@ -106,7 +111,7 @@ public class Main extends Activity {
         final Button button_u = (Button) findViewById(R.id.button_u);
         button_u.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (g.move(Movements.UP, canvas)) {
+                if (g.move(Movements.UP)) {
                     draw();
                 }
             }
@@ -115,7 +120,7 @@ public class Main extends Activity {
         final Button button_d = (Button) findViewById(R.id.button_d);
         button_d.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (g.move(Movements.DOWN, canvas)) {
+                if (g.move(Movements.DOWN)) {
                     draw();
                 }
             }
@@ -124,7 +129,7 @@ public class Main extends Activity {
         final Button button_l = (Button) findViewById(R.id.button_l);
         button_l.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (g.move(Movements.LEFT, canvas)) {
+                if (g.move(Movements.LEFT)) {
                     draw();
                 }
             }
@@ -133,7 +138,7 @@ public class Main extends Activity {
         final Button button_r = (Button) findViewById(R.id.button_r);
         button_r.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (g.move(Movements.RIGHT, canvas)) {
+                if (g.move(Movements.RIGHT)) {
                     draw();
                 }
             }
