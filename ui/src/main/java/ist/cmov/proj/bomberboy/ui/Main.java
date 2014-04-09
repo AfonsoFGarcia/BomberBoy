@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.view.SurfaceView;
@@ -16,13 +18,12 @@ import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 
 import ist.cmov.proj.bomberboy.status.GameStatus;
 import ist.cmov.proj.bomberboy.status.Movements;
 import ist.cmov.proj.bomberboy.status.ReadMap;
 import ist.cmov.proj.bomberboy.status.Types;
-
-import static java.lang.System.exit;
 
 public class Main extends Activity {
 
@@ -32,9 +33,13 @@ public class Main extends Activity {
     private GameStatus g;
     private Bitmap bg = Bitmap.createBitmap(475, 475, Bitmap.Config.ARGB_8888);
     private Canvas canvas = new Canvas(bg);
+    protected HashMap<Types, Bitmap> bitmaps;
+    private static int SIZE;
+    private int bitSize;
 
     @SuppressWarnings("deprecation")
     private void draw() {
+        setBitmap(g.getMap());
         game.setBackgroundDrawable(new BitmapDrawable(bg));
     }
 
@@ -51,14 +56,9 @@ public class Main extends Activity {
             public void onClick(DialogInterface dialog, int whichButton) {
                 //noinspection ConstantConditions
                 playerName = input.getText().toString();
+                if (playerName.equals("")) getName();
                 TextView player = (TextView) findViewById(R.id.playerName);
                 player.setText(playerName);
-            }
-        });
-
-        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                exit(-1);
             }
         });
 
@@ -69,12 +69,24 @@ public class Main extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        bitmaps = new HashMap<Types, Bitmap>();
+        bitmaps.put(Types.BARRIER, BitmapFactory.decodeResource(getResources(), R.drawable.barrier));
+        bitmaps.put(Types.BOMB, BitmapFactory.decodeResource(getResources(), R.drawable.bomb));
+        bitmaps.put(Types.PERSON, BitmapFactory.decodeResource(getResources(), R.drawable.person));
+        bitmaps.put(Types.WALL, BitmapFactory.decodeResource(getResources(), R.drawable.wall));
+        bitmaps.put(Types.NULL, BitmapFactory.decodeResource(getResources(), R.drawable.grass));
+
         setContentView(R.layout.activity_main);
         game = (SurfaceView) findViewById(R.id.gameView);
         BufferedReader l = new BufferedReader(new InputStreamReader(getResources().openRawResource(R.raw.l1)));
         Types[][] m = ReadMap.getMap(l);
-        g = new GameStatus(getApplicationContext(), m);
-        g.setBitmap(canvas);
+        g = new GameStatus(m);
+        SIZE = GameStatus.SIZE;
+
+        /* Represents a line equation that gets the size of the bitmap in the canvas in order to the size of the board */
+        bitSize = (25 * (SIZE) - 450);
+
+        setBitmap(g.getMap());
         draw();
 
         final Button button_a = (Button) findViewById(R.id.button_a);
@@ -194,4 +206,17 @@ public class Main extends Activity {
         }
     }
 
+    public void setBitmap(Types[][] t) {
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                drawOnCanvas(t[i][j], canvas, i, j);
+            }
+        }
+    }
+
+    private void drawOnCanvas(Types t, Canvas c, Integer x, Integer y) {
+        Bitmap b = bitmaps.get(t);
+        Rect rect = new Rect(bitSize * y, bitSize * x, bitSize * y + bitSize, bitSize * x + bitSize);
+        c.drawBitmap(b, null, rect, null);
+    }
 }
