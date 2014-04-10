@@ -86,11 +86,13 @@
                 android:padding="20px" />
         </RelativeLayout>
 
-        <SurfaceView
-            android:layout_width="match_parent"
-            android:layout_height="1080px"
+        <view
+            android:layout_width="1064px"
+            android:layout_height="1064px"
+            class="ist.cmov.proj.bomberboy.ui.BomberView"
             android:id="@+id/gameView"
             android:layout_gravity="center"
+            android:layout_marginLeft="8px"
             android:layout_below="@+id/relativeLayout"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true" />

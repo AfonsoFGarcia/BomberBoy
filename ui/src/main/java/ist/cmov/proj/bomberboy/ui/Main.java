@@ -6,10 +6,8 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.view.SurfaceView;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -27,22 +25,14 @@ import ist.cmov.proj.bomberboy.status.Types;
 
 public class Main extends Activity {
 
-    private SurfaceView game;
-    private boolean scalingComplete = false;
-    private String playerName;
-    private GameStatus g;
-    private Bitmap bg = Bitmap.createBitmap(475, 475, Bitmap.Config.ARGB_8888);
-    private Canvas canvas = new Canvas(bg);
+    protected BomberView game;
+    protected boolean scalingComplete = false;
+    protected String playerName;
+    protected GameStatus g;
+    protected Bitmap bg = Bitmap.createBitmap(475, 475, Bitmap.Config.ARGB_8888);
+    protected Canvas canvas = new Canvas(bg);
     protected HashMap<Types, Bitmap> bitmaps;
-    private static int SIZE = GameStatus.SIZE;
-    /* Represents a line equation that gets the size of the bitmap in the canvas in order to the size of the board */
-    private int bitSize = (25 * (SIZE) - 450);
-
-    @SuppressWarnings("deprecation")
-    private void draw() {
-        setBitmap(g.getMap());
-        game.setBackgroundDrawable(new BitmapDrawable(bg));
-    }
+    protected static int SIZE = GameStatus.SIZE;
 
     private void getName() {
         getName("Enter your name");
@@ -71,6 +61,13 @@ public class Main extends Activity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("ACTIVITY", "onResume");
+        game.toggleRunning();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -83,20 +80,18 @@ public class Main extends Activity {
         bitmaps.put(Types.PERSONANDBOMB, bitmaps.get(Types.PERSON));
 
         setContentView(R.layout.activity_main);
-        game = (SurfaceView) findViewById(R.id.gameView);
+        game = (BomberView) findViewById(R.id.gameView);
         BufferedReader l = new BufferedReader(new InputStreamReader(getResources().openRawResource(R.raw.l1)));
         Types[][] m = ReadMap.getMap(l);
         g = new GameStatus(m);
 
-
-        setBitmap(g.getMap());
-        draw();
+        game.startThread(getApplicationContext(), SIZE, g);
 
         final Button button_a = (Button) findViewById(R.id.button_a);
         button_a.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (g.dropBomb()) {
-                    draw();
+                    game.signalRedraw();
                 }
             }
         });
@@ -104,7 +99,7 @@ public class Main extends Activity {
         final Button button_b = (Button) findViewById(R.id.button_b);
         button_b.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                draw();
+                game.signalRedraw();
             }
         });
 
@@ -112,7 +107,7 @@ public class Main extends Activity {
         button_u.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (g.move(Movements.UP)) {
-                    draw();
+                    game.signalRedraw();
                 }
             }
         });
@@ -121,7 +116,7 @@ public class Main extends Activity {
         button_d.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (g.move(Movements.DOWN)) {
-                    draw();
+                    game.signalRedraw();
                 }
             }
         });
@@ -130,7 +125,7 @@ public class Main extends Activity {
         button_l.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (g.move(Movements.LEFT)) {
-                    draw();
+                    game.signalRedraw();
                 }
             }
         });
@@ -139,7 +134,7 @@ public class Main extends Activity {
         button_r.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (g.move(Movements.RIGHT)) {
-                    draw();
+                    game.signalRedraw();
                 }
             }
         });
@@ -149,6 +144,7 @@ public class Main extends Activity {
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
+        game.signalRedraw();
         if (!scalingComplete) // only do this once
         {
             scaleContents(findViewById(R.id.window_nexus5), findViewById(R.id.container));
@@ -211,17 +207,11 @@ public class Main extends Activity {
         }
     }
 
-    public void setBitmap(Types[][] t) {
-        for (int i = 0; i < SIZE; i++) {
-            for (int j = 0; j < SIZE; j++) {
-                drawOnCanvas(t[i][j], canvas, i, j);
-            }
-        }
-    }
-
-    private void drawOnCanvas(Types t, Canvas c, Integer x, Integer y) {
-        Bitmap b = bitmaps.get(t);
-        Rect rect = new Rect(bitSize * y, bitSize * x, bitSize * y + bitSize, bitSize * x + bitSize);
-        c.drawBitmap(b, null, rect, null);
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d("ACTIVITY", "onPause");
+        game.toggleRunning();
+        game.invalidate();
     }
 }
