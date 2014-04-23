@@ -6,10 +6,14 @@ package ist.cmov.proj.bomberboy.status;
 public class Pair {
     public Integer x;
     public Integer y;
+    public Boolean bomb;
+    public Boolean dead;
 
     public Pair(Integer x, Integer y) {
         this.x = x;
         this.y = y;
+        this.bomb = false;
+        this.dead = false;
     }
 
     public void incrX() {
@@ -26,5 +30,17 @@ public class Pair {
 
     public void decrY() {
         y--;
+    }
+
+    public void toggleBomb() {
+        bomb = !bomb;
+    }
+
+    public void kill() {
+        dead = true;
+    }
+
+    public Boolean hasBomb() {
+        return bomb;
     }
 }

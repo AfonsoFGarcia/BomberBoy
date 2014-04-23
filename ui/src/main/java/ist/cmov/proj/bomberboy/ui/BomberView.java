@@ -1,6 +1,8 @@
 package ist.cmov.proj.bomberboy.ui;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -17,13 +19,14 @@ import ist.cmov.proj.bomberboy.status.Types;
 /**
  * Created by agfrg on 09/04/14.
  */
-class BomberView extends SurfaceView implements SurfaceHolder.Callback {
+public class BomberView extends SurfaceView implements SurfaceHolder.Callback {
     private BomberThread thread;
     private boolean running = false;
     private boolean started = false;
     private int size = 1064;
+    protected Main main;
 
-    class BomberThread extends Thread {
+    public class BomberThread extends Thread {
         Object lock = new Object();
         boolean run = false;
         boolean redraw = true;
@@ -48,6 +51,7 @@ class BomberView extends SurfaceView implements SurfaceHolder.Callback {
             bitmaps.put(Types.WALL, BitmapFactory.decodeResource(getResources(), R.drawable.wall));
             bitmaps.put(Types.NULL, BitmapFactory.decodeResource(getResources(), R.drawable.grass));
             bitmaps.put(Types.PERSONANDBOMB, bitmaps.get(Types.PERSON));
+            status.addBomberThread(this);
         }
 
         public void setRunning(boolean b) {
@@ -79,6 +83,31 @@ class BomberView extends SurfaceView implements SurfaceHolder.Callback {
             redraw = true;
         }
 
+        public BomberThread getThis() {
+            return this;
+        }
+
+        public void smellyDied() {
+            main.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    AlertDialog.Builder alert = new AlertDialog.Builder(main, AlertDialog.THEME_HOLO_LIGHT);
+
+                    alert.setTitle("You died!");
+
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            status = new GameStatus(main.getStartMap());
+                            status.addBomberThread(getThis());
+                            main.setGameStatus(status);
+                        }
+                    });
+
+                    alert.show();
+                }
+            });
+        }
+
         @Override
         public void run() {
             while (run) {
@@ -106,7 +135,8 @@ class BomberView extends SurfaceView implements SurfaceHolder.Callback {
         holder.addCallback(this);
     }
 
-    public void startThread(Context context, int s, GameStatus ss) {
+    public void startThread(Context context, int s, GameStatus ss, Main main) {
+        this.main = main;
         if (thread == null)
             thread = new BomberThread(getHolder(), context, size / s, s, ss);
     }

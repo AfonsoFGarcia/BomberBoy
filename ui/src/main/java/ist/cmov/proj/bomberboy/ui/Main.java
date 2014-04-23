@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -29,10 +28,9 @@ public class Main extends Activity {
     protected boolean scalingComplete = false;
     protected String playerName;
     protected GameStatus g;
-    protected Bitmap bg = Bitmap.createBitmap(475, 475, Bitmap.Config.ARGB_8888);
-    protected Canvas canvas = new Canvas(bg);
     protected HashMap<Types, Bitmap> bitmaps;
     protected static int SIZE = GameStatus.SIZE;
+    protected Types[][] map;
 
     private void getName() {
         getName("Enter your name");
@@ -60,6 +58,14 @@ public class Main extends Activity {
         alert.show();
     }
 
+    public void setGameStatus(GameStatus g) {
+        this.g = g;
+    }
+
+    public Types[][] getStartMap() {
+        return map;
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -82,10 +88,10 @@ public class Main extends Activity {
         setContentView(R.layout.activity_main);
         game = (BomberView) findViewById(R.id.gameView);
         BufferedReader l = new BufferedReader(new InputStreamReader(getResources().openRawResource(R.raw.l1)));
-        Types[][] m = ReadMap.getMap(l);
-        g = new GameStatus(m);
+        map = ReadMap.getMap(l);
+        g = new GameStatus(map);
 
-        game.startThread(getApplicationContext(), SIZE, g);
+        game.startThread(getApplicationContext(), SIZE, g, this);
 
         final Button button_a = (Button) findViewById(R.id.button_a);
         button_a.setOnClickListener(new View.OnClickListener() {
