@@ -55,6 +55,12 @@ public class Robot extends Thread implements Controllable {
             try {
                 Thread.sleep(SLEEPTIME);
                 Quadrant closest = Quadrant.getQuadrant(getClosestPlayer(), this);
+                if (move(closest.getMoveOne())) {
+                } else if (move(closest.getMoveTwo())) {
+                } else if (move(closest.getMoveThree())) {
+                } else {
+                    move(closest.getMoveFour());
+                }
             } catch (InterruptedException e) {
                 killRobot();
             }

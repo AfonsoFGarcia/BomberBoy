@@ -7,10 +7,10 @@ import ist.cmov.proj.bomberboy.status.Movements;
  * Created by agfrg on 26/04/14.
  */
 public enum Quadrant {
-    TOPLEFT(Movements.UP, Movements.LEFT, Movements.RIGHT, Movements.DOWN),
-    TOPRIGHT(Movements.UP, Movements.RIGHT, Movements.LEFT, Movements.DOWN),
-    BOTTOMLEFT(Movements.DOWN, Movements.LEFT, Movements.RIGHT, Movements.UP),
-    BOTTOMRIGHT(Movements.DOWN, Movements.RIGHT, Movements.LEFT, Movements.UP);
+    TOPLEFT(Movements.LEFT, Movements.UP, Movements.RIGHT, Movements.DOWN),
+    TOPRIGHT(Movements.RIGHT, Movements.UP, Movements.LEFT, Movements.DOWN),
+    BOTTOMLEFT(Movements.LEFT, Movements.DOWN, Movements.RIGHT, Movements.UP),
+    BOTTOMRIGHT(Movements.RIGHT, Movements.DOWN, Movements.LEFT, Movements.UP);
 
     private final Movements moveOne;
     private final Movements moveTwo;
@@ -33,11 +33,11 @@ public enum Quadrant {
     }
 
     public Movements getMoveThree() {
-        return moveTwo;
+        return moveThree;
     }
 
     public Movements getMoveFour() {
-        return moveTwo;
+        return moveFour;
     }
 
     public static Quadrant getQuadrant(Player p, Robot r) {

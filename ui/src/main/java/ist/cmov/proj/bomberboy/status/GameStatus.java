@@ -121,11 +121,7 @@ public class GameStatus {
 
             if (!canMove(e, c)) return false;
 
-            if (t[c.getX()][c.getY()].equals(Types.PERSONANDBOMB)) {
-                t[c.getX()][c.getY()] = Types.BOMB;
-            } else {
-                t[c.getX()][c.getY()] = Types.NULL;
-            }
+            t[c.getX()][c.getY()] = Types.NULL;
 
             if (e.equals(Movements.DOWN)) {
                 c.incrX();
@@ -137,10 +133,10 @@ public class GameStatus {
                 c.incrY();
             }
 
-            if (t[c.getX()][c.getY()].equals(Types.BOMB)) {
-                t[c.getX()][c.getY()] = Types.PERSONANDBOMB;
-            } else {
+            if (c instanceof Player) {
                 t[c.getX()][c.getY()] = Types.PERSON;
+            } else {
+                t[c.getX()][c.getY()] = Types.ROBOT;
             }
 
             return true;

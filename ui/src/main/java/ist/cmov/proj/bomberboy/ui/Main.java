@@ -28,7 +28,6 @@ public class Main extends Activity {
 
     private void getName() {
         getName("Enter your name");
-        g.beginGame();
     }
 
     private void getName(String title) {
@@ -44,9 +43,13 @@ public class Main extends Activity {
             public void onClick(DialogInterface dialog, int whichButton) {
                 //noinspection ConstantConditions
                 playerName = input.getText().toString();
-                if (playerName.equals("")) getName("Enter a valid name");
-                TextView player = (TextView) findViewById(R.id.playerName);
-                player.setText(playerName);
+                if (playerName.equals("")) {
+                    getName("Enter a valid name");
+                } else {
+                    TextView player = (TextView) findViewById(R.id.playerName);
+                    player.setText(playerName);
+                    g.beginGame();
+                }
             }
         });
 
