@@ -32,6 +32,10 @@ public class Robot extends Thread implements Controllable {
         this.id = id;
     }
 
+    public Integer getID() {
+        return id;
+    }
+
     private Player getClosestPlayer() {
         Player player = null;
         Double currentDistance = 0d;
@@ -71,6 +75,10 @@ public class Robot extends Thread implements Controllable {
                 killRobot();
             }
         }
+    }
+
+    public void stopRobot() {
+        dead = true;
     }
 
     private void killRobot() {

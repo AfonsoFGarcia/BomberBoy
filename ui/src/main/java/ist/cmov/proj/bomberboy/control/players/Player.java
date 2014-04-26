@@ -15,12 +15,23 @@ public class Player implements Controllable {
     private GameStatus status;
     private Integer id;
 
-    public Player(Integer x, Integer y, GameStatus status, Integer id) {
+    public Player(Integer x, Integer y, GameStatus status) {
         this.x = x;
         this.y = y;
         this.bomb = false;
         this.dead = false;
         this.status = status;
+    }
+
+    public Player(Player other, GameStatus status) {
+        this.x = other.x;
+        this.y = other.y;
+        this.bomb = false;
+        this.dead = false;
+        this.status = status;
+    }
+
+    public void setID(Integer id) {
         this.id = id;
     }
 

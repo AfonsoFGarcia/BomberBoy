@@ -67,6 +67,10 @@ public class Main extends Activity {
         game.toggleRunning();
     }
 
+    public void getPlayer() {
+        me = g.getPlayer();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,7 +90,7 @@ public class Main extends Activity {
             System.exit(-1);
         }
 
-        me = g.getPlayer();
+        getPlayer();
 
         game.startThread(getApplicationContext(), GameStatus.SIZE, g, this);
 

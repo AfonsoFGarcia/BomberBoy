@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Stack;
 
 import ist.cmov.proj.bomberboy.control.Controllable;
 import ist.cmov.proj.bomberboy.control.players.Player;
@@ -21,6 +22,7 @@ public class GameStatus {
     private Types[][] t;
     private HashMap<Integer, Player> p;
     private HashMap<Integer, Robot> r;
+    private Stack<Player> playerStack;
     BomberView.BomberThread thread;
 
     public void addBomberThread(BomberView.BomberThread t) {
@@ -46,19 +48,34 @@ public class GameStatus {
         r.put(rID, robot);
     }
 
-    private void createPlayer() {
-        t[1][1] = Types.PERSON;
-        p.put(10, new Player(1, 1, this, 10));
+    private void createPlayer(Player player) {
+        t[player.getX()][player.getY()] = Types.PERSON;
+        int pID = 10 + p.size();
+        player.setID(pID);
+        p.put(pID, player);
     }
 
     public Player getPlayer() {
-        return p.get(10);
+        Player player = new Player(playerStack.pop(), this);
+        createPlayer(player);
+        return player;
+    }
+
+    public void endGame() {
+        for (Robot r : this.r.values()) {
+            r.stopRobot();
+        }
     }
 
     public void beginGame() {
+        HashMap<Integer, Robot> rNews = new HashMap<Integer, Robot>();
         for (Robot r : this.r.values()) {
-            r.start();
+            Robot rNew = new Robot(this, r.getX(), r.getY());
+            rNew.setID(r.getID());
+            rNews.put(r.getID(), rNew);
+            rNew.start();
         }
+        r = rNews;
     }
 
     private void setMap(Types[][] types) {
@@ -68,13 +85,14 @@ public class GameStatus {
         }
     }
 
-    public void initializeGameStatus(Types[][] types, ArrayList<Robot> robots) {
+    public void initializeGameStatus(Types[][] types, ArrayList<Robot> robots, Stack<Player> pS) {
         setMap(types);
         r = new HashMap<Integer, Robot>();
+        p = new HashMap<Integer, Player>();
         for (Robot robot : robots) {
             registerRobot(robot);
         }
-        createPlayer();
+        playerStack = (Stack<Player>) pS.clone();
     }
 
     private boolean canMove(Movements e, Controllable c) {
