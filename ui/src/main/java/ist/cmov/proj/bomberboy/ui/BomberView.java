@@ -103,7 +103,7 @@ public class BomberView extends SurfaceView implements SurfaceHolder.Callback {
                     alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
                             status = new GameStatus();
-                            status.initializeGameStatus(SettingsReader.getMap(), SettingsReader.getRobots(), SettingsReader.getPlayers());
+                            status.initializeGameStatus(SettingsReader.getSettings());
                             status.addBomberThread(getThis());
                             main.setGameStatus(status);
                             main.getPlayer();

@@ -13,41 +13,47 @@ import ist.cmov.proj.bomberboy.status.GameStatus;
 import ist.cmov.proj.bomberboy.status.Types;
 
 public class SettingsReader {
-    private static Types[][] map;
-    private static ArrayList<Robot> robots = new ArrayList<Robot>();
-    private static Stack<Player> players = new Stack<Player>();
+    private static ArrayList<Robot> robots;
+    private static Stack<Player> players;
+    private static GameSettings settings;
 
-    public static Types[][] getMap() {
-        return map;
-    }
-
-    public static ArrayList<Robot> getRobots() {
-        return robots;
-    }
-
-    public static Stack<Player> getPlayers() {
-        return players;
+    public static GameSettings getSettings() {
+        return settings;
     }
 
     public static void readSettings(BufferedReader reader, GameStatus status) throws NoSuchTypeException {
-        ArrayList<String> map = new ArrayList<String>();
+
+        robots = new ArrayList<Robot>();
+        players = new Stack<Player>();
+
+        ArrayList<String> mapStrings = new ArrayList<String>();
         try {
             String s = reader.readLine();
             while (s != null) {
-                map.add(s);
+                mapStrings.add(s);
                 s = reader.readLine();
             }
         } catch (IOException e) {
             Log.e("IOException", e.getMessage());
         }
 
-        SettingsReader.map = new Types[status.SIZE][status.SIZE];
+        Types[][] map = new Types[status.SIZE][status.SIZE];
 
-        for(int i = 0; i < map.size(); i++) {
-            parseString(map.get(i), SettingsReader.map[i], status, i);
+        for (int i = 9; i < mapStrings.size(); i++) {
+            parseString(mapStrings.get(i), map[i - 9], status, i - 9);
         }
 
-        status.initializeGameStatus(SettingsReader.map, SettingsReader.robots, SettingsReader.players);
+        SettingsReader.settings = new GameSettings(mapStrings.get(0),
+                Integer.parseInt(mapStrings.get(1).substring(3)),
+                Integer.parseInt(mapStrings.get(2).substring(3)),
+                Integer.parseInt(mapStrings.get(3).substring(3)),
+                Integer.parseInt(mapStrings.get(4).substring(3)),
+                Integer.parseInt(mapStrings.get(5).substring(3)),
+                Integer.parseInt(mapStrings.get(6).substring(3)),
+                Integer.parseInt(mapStrings.get(7).substring(3)),
+                map, robots, players);
+
+        status.initializeGameStatus(settings);
     }
 
     private static void parseString(String l, Types[] typeMap, GameStatus s, int x) throws NoSuchTypeException {

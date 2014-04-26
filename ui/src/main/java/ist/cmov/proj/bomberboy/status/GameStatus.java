@@ -12,6 +12,7 @@ import ist.cmov.proj.bomberboy.control.Controllable;
 import ist.cmov.proj.bomberboy.control.players.Player;
 import ist.cmov.proj.bomberboy.control.robots.Robot;
 import ist.cmov.proj.bomberboy.ui.BomberView;
+import ist.cmov.proj.bomberboy.utils.GameSettings;
 
 public class GameStatus {
 
@@ -85,14 +86,14 @@ public class GameStatus {
         }
     }
 
-    public void initializeGameStatus(Types[][] types, ArrayList<Robot> robots, Stack<Player> pS) {
-        setMap(types);
+    public void initializeGameStatus(GameSettings settings) {
+        setMap(settings.getMap());
         r = new HashMap<Integer, Robot>();
         p = new HashMap<Integer, Player>();
-        for (Robot robot : robots) {
+        for (Robot robot : settings.getRobots()) {
             registerRobot(robot);
         }
-        playerStack = (Stack<Player>) pS.clone();
+        playerStack = (Stack<Player>) settings.getPlayers().clone();
     }
 
     private boolean canMove(Movements e, Controllable c) {
