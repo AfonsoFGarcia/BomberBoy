@@ -18,9 +18,11 @@ import ist.cmov.proj.bomberboy.utils.SettingsReader;
 public class GameStatus {
 
     public static int SIZE = 19;
-    private int RANGE;
-    protected int TIMETOBLOW;
-    protected int TIMEOFBLOW;
+    protected static boolean GAMEOVER = false;
+    protected static int RANGE;
+    protected static int TIMETOBLOW;
+    protected static int TIMEOFBLOW;
+
     protected Object lock = new Object();
     private Types[][] t;
     private HashMap<Integer, Player> p;
@@ -105,6 +107,7 @@ public class GameStatus {
             registerRobot(robot);
         }
         playerStack = (Stack<Player>) settings.getPlayers().clone();
+        GAMEOVER = false;
     }
 
     private boolean canMove(Movements e, Controllable c) {
@@ -137,6 +140,14 @@ public class GameStatus {
 
     private boolean emptyPosition(int x, int y) {
         return t[x][y].equals(Types.NULL) || t[x][y].equals(Types.EXPLOSION);
+    }
+
+    private boolean diedInNuclearFallout(Controllable c) {
+        if (t[c.getX()][c.getY()].equals(Types.EXPLOSION)) {
+            c.interrupt();
+            return true;
+        }
+        return false;
     }
 
     private void moveClean(Player c) {
@@ -199,6 +210,11 @@ public class GameStatus {
                 c.incrY();
             }
 
+            if (diedInNuclearFallout(c) && c instanceof Player) {
+                thread.smellyDied();
+                return true;
+            }
+
             if (c instanceof Player) {
                 movePlace((Player) c);
             } else {
@@ -255,17 +271,20 @@ public class GameStatus {
                 c.toggleBomb();
                 if (cleanTab(params[0], params[1])) {
                     thread.smellyDied();
+                    GAMEOVER = true;
                 }
             }
 
-            try {
-                Thread.sleep(TIMEOFBLOW);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if (!GAMEOVER) {
+                try {
+                    Thread.sleep(TIMEOFBLOW);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
 
             synchronized (lock) {
-                t[params[0]][params[1]] = Types.EXPLOSION;
+                t[params[0]][params[1]] = Types.NULL;
                 cleanExplosion(params[0], params[1]);
             }
 
