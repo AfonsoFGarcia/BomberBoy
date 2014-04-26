@@ -33,8 +33,8 @@ public class Main extends Activity {
 
     private void getName(String title) {
         AlertDialog.Builder alert = new AlertDialog.Builder(this, AlertDialog.THEME_HOLO_LIGHT);
-
         alert.setTitle(title);
+        alert.setCancelable(false);
 
         // Set an EditText view to get user input
         final EditText input = new EditText(this);
