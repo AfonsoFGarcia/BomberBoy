@@ -1,6 +1,8 @@
 package ist.cmov.proj.bomberboy.control.players;
 
 import ist.cmov.proj.bomberboy.control.Controllable;
+import ist.cmov.proj.bomberboy.status.GameStatus;
+import ist.cmov.proj.bomberboy.status.Movements;
 
 /**
  * Created by agfrg on 31/03/14.
@@ -10,12 +12,16 @@ public class Player implements Controllable {
     public Integer y;
     public Boolean bomb;
     public Boolean dead;
+    private GameStatus status;
+    private Integer id;
 
-    public Player(Integer x, Integer y) {
+    public Player(Integer x, Integer y, GameStatus status, Integer id) {
         this.x = x;
         this.y = y;
         this.bomb = false;
         this.dead = false;
+        this.status = status;
+        this.id = id;
     }
 
     public void incrX() {
@@ -42,7 +48,7 @@ public class Player implements Controllable {
         dead = true;
     }
 
-    public Boolean hasBomb() {
+    public boolean hasBomb() {
         return bomb;
     }
 
@@ -56,5 +62,13 @@ public class Player implements Controllable {
 
     public void interrupt() {
         kill();
+    }
+
+    public boolean move(Movements e) {
+        return status.move(e, id);
+    }
+
+    public boolean dropBomb() {
+        return status.dropBomb(id);
     }
 }

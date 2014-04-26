@@ -3,6 +3,7 @@ package ist.cmov.proj.bomberboy.control.robots;
 import ist.cmov.proj.bomberboy.control.Controllable;
 import ist.cmov.proj.bomberboy.control.players.Player;
 import ist.cmov.proj.bomberboy.status.GameStatus;
+import ist.cmov.proj.bomberboy.status.Movements;
 
 /**
  * Created by agfrg on 26/04/14.
@@ -16,6 +17,7 @@ public class Robot extends Thread implements Controllable {
     private Integer y;
     private Boolean dead;
     private Boolean bomb;
+    private Integer id;
 
     public Robot(GameStatus status, Integer x, Integer y) {
         this.status = status;
@@ -23,6 +25,10 @@ public class Robot extends Thread implements Controllable {
         this.y = y;
         this.dead = false;
         this.bomb = false;
+    }
+
+    public void setID(Integer id) {
+        this.id = id;
     }
 
     private Player getClosestPlayer() {
@@ -65,5 +71,37 @@ public class Robot extends Thread implements Controllable {
 
     public int getY() {
         return y;
+    }
+
+    public void incrX() {
+        x++;
+    }
+
+    public void decrX() {
+        x--;
+    }
+
+    public void incrY() {
+        y++;
+    }
+
+    public void decrY() {
+        y--;
+    }
+
+    public boolean move(Movements e) {
+        return status.move(e, id);
+    }
+
+    public boolean dropBomb() {
+        return status.dropBomb(id);
+    }
+
+    public boolean hasBomb() {
+        return bomb;
+    }
+
+    public void toggleBomb() {
+        bomb = !bomb;
     }
 }

@@ -3,7 +3,6 @@ package ist.cmov.proj.bomberboy.ui;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,12 +12,11 @@ import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.HashMap;
 
+import ist.cmov.proj.bomberboy.control.players.Player;
 import ist.cmov.proj.bomberboy.status.GameStatus;
 import ist.cmov.proj.bomberboy.status.Movements;
 import ist.cmov.proj.bomberboy.status.SettingsReader;
-import ist.cmov.proj.bomberboy.status.Types;
 
 public class Main extends Activity {
 
@@ -26,8 +24,7 @@ public class Main extends Activity {
     protected boolean scalingComplete = false;
     protected String playerName;
     protected GameStatus g;
-    protected HashMap<Types, Bitmap> bitmaps;
-    protected static int SIZE = GameStatus.SIZE;
+    protected Player me;
 
     private void getName() {
         getName("Enter your name");
@@ -78,12 +75,14 @@ public class Main extends Activity {
         BufferedReader l = new BufferedReader(new InputStreamReader(getResources().openRawResource(R.raw.l1)));
         SettingsReader.readSettings(l, g);
 
-        game.startThread(getApplicationContext(), SIZE, g, this);
+        me = g.getPlayer();
+
+        game.startThread(getApplicationContext(), GameStatus.SIZE, g, this);
 
         final Button button_a = (Button) findViewById(R.id.button_a);
         button_a.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (g.dropBomb()) {
+                if (me.dropBomb()) {
                     game.signalRedraw();
                 }
             }
@@ -99,7 +98,7 @@ public class Main extends Activity {
         final Button button_u = (Button) findViewById(R.id.button_u);
         button_u.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (g.move(Movements.UP)) {
+                if (me.move(Movements.UP)) {
                     game.signalRedraw();
                 }
             }
@@ -108,7 +107,7 @@ public class Main extends Activity {
         final Button button_d = (Button) findViewById(R.id.button_d);
         button_d.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (g.move(Movements.DOWN)) {
+                if (me.move(Movements.DOWN)) {
                     game.signalRedraw();
                 }
             }
@@ -117,7 +116,7 @@ public class Main extends Activity {
         final Button button_l = (Button) findViewById(R.id.button_l);
         button_l.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (g.move(Movements.LEFT)) {
+                if (me.move(Movements.LEFT)) {
                     game.signalRedraw();
                 }
             }
@@ -126,7 +125,7 @@ public class Main extends Activity {
         final Button button_r = (Button) findViewById(R.id.button_r);
         button_r.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (g.move(Movements.RIGHT)) {
+                if (me.move(Movements.RIGHT)) {
                     game.signalRedraw();
                 }
             }

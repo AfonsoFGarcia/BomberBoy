@@ -42,12 +42,17 @@ public class GameStatus {
 
     private void registerRobot(Robot robot) {
         int rID = 20 + r.size();
+        robot.setID(rID);
         r.put(rID, robot);
     }
 
     private void createPlayer() {
         t[1][1] = Types.PERSON;
-        p.put(10, new Player(1, 1));
+        p.put(10, new Player(1, 1, this, 10));
+    }
+
+    public Player getPlayer() {
+        return p.get(10);
     }
 
     public void beginGame() {
@@ -65,34 +70,35 @@ public class GameStatus {
 
     public void initializeGameStatus(Types[][] types, ArrayList<Robot> robots) {
         setMap(types);
+        r = new HashMap<Integer, Robot>();
         for (Robot robot : robots) {
             registerRobot(robot);
         }
         createPlayer();
     }
 
-    private boolean canMove(Movements e) {
-        if (e.equals(Movements.DOWN) && p.get(10).x < SIZE - 1 && isNotOccupied(e)) {
+    private boolean canMove(Movements e, Controllable c) {
+        if (e.equals(Movements.DOWN) && c.getX() < SIZE - 1 && isNotOccupied(e, c)) {
             return true;
-        } else if (e.equals(Movements.UP) && p.get(10).x > 0 && isNotOccupied(e)) {
+        } else if (e.equals(Movements.UP) && c.getX() > 0 && isNotOccupied(e, c)) {
             return true;
-        } else if (e.equals(Movements.LEFT) && p.get(10).y > 0 && isNotOccupied(e)) {
+        } else if (e.equals(Movements.LEFT) && c.getY() > 0 && isNotOccupied(e, c)) {
             return true;
-        } else if (e.equals(Movements.RIGHT) && p.get(10).y < SIZE - 1 && isNotOccupied(e)) {
+        } else if (e.equals(Movements.RIGHT) && c.getY() < SIZE - 1 && isNotOccupied(e, c)) {
             return true;
         } else {
             return false;
         }
     }
 
-    private boolean isNotOccupied(Movements e) {
-        if (e.equals(Movements.DOWN) && emptyPosition(p.get(10).x + 1, p.get(10).y)) {
+    private boolean isNotOccupied(Movements e, Controllable c) {
+        if (e.equals(Movements.DOWN) && emptyPosition(c.getX() + 1, c.getY())) {
             return true;
-        } else if (e.equals(Movements.UP) && emptyPosition(p.get(10).x - 1, p.get(10).y)) {
+        } else if (e.equals(Movements.UP) && emptyPosition(c.getX() - 1, c.getY())) {
             return true;
-        } else if (e.equals(Movements.LEFT) && emptyPosition(p.get(10).x, p.get(10).y - 1)) {
+        } else if (e.equals(Movements.LEFT) && emptyPosition(c.getX(), c.getY() - 1)) {
             return true;
-        } else if (e.equals(Movements.RIGHT) && emptyPosition(p.get(10).x, p.get(10).y + 1)) {
+        } else if (e.equals(Movements.RIGHT) && emptyPosition(c.getX(), c.getY() + 1)) {
             return true;
         } else {
             return false;
@@ -103,44 +109,60 @@ public class GameStatus {
         return t[x][y].equals(Types.NULL);
     }
 
-    public boolean move(Movements e) {
+    public boolean move(Movements e, Integer id) {
         synchronized (lock) {
-            if (!canMove(e)) return false;
+            Controllable c = null;
 
-            if (t[p.get(10).x][p.get(10).y].equals(Types.PERSONANDBOMB)) {
-                t[p.get(10).x][p.get(10).y] = Types.BOMB;
+            if (Math.floor(id / 10d) == 1) {
+                c = p.get(id);
             } else {
-                t[p.get(10).x][p.get(10).y] = Types.NULL;
+                c = r.get(id);
+            }
+
+            if (!canMove(e, c)) return false;
+
+            if (t[c.getX()][c.getY()].equals(Types.PERSONANDBOMB)) {
+                t[c.getX()][c.getY()] = Types.BOMB;
+            } else {
+                t[c.getX()][c.getY()] = Types.NULL;
             }
 
             if (e.equals(Movements.DOWN)) {
-                p.get(10).incrX();
+                c.incrX();
             } else if (e.equals(Movements.UP)) {
-                p.get(10).decrX();
+                c.decrX();
             } else if (e.equals(Movements.LEFT)) {
-                p.get(10).decrY();
+                c.decrY();
             } else {
-                p.get(10).incrY();
+                c.incrY();
             }
 
-            if (t[p.get(10).x][p.get(10).y].equals(Types.BOMB)) {
-                t[p.get(10).x][p.get(10).y] = Types.PERSONANDBOMB;
+            if (t[c.getX()][c.getY()].equals(Types.BOMB)) {
+                t[c.getX()][c.getY()] = Types.PERSONANDBOMB;
             } else {
-                t[p.get(10).x][p.get(10).y] = Types.PERSON;
+                t[c.getX()][c.getY()] = Types.PERSON;
             }
 
             return true;
         }
     }
 
-    public boolean dropBomb() {
+    public boolean dropBomb(Integer id) {
         synchronized (lock) {
-            if (!p.get(10).hasBomb()) {
-                t[p.get(10).x][p.get(10).y] = Types.PERSONANDBOMB;
-                p.get(10).toggleBomb();
+            Controllable c = null;
 
-                BlowBombTask task = new BlowBombTask();
-                task.execute(p.get(10).x, p.get(10).y);
+            if (Math.floor(id / 10d) == 1) {
+                c = p.get(id);
+            } else {
+                c = r.get(id);
+            }
+
+            if (!c.hasBomb()) {
+                t[c.getX()][c.getY()] = Types.PERSONANDBOMB;
+                c.toggleBomb();
+
+                BlowBombTask task = new BlowBombTask(c);
+                task.execute(c.getX(), c.getY());
 
                 return true;
             } else {
@@ -150,6 +172,11 @@ public class GameStatus {
     }
 
     private class BlowBombTask extends AsyncTask<Integer, Void, Void> {
+        private Controllable c;
+
+        public BlowBombTask(Controllable c) {
+            this.c = c;
+        }
         protected Void doInBackground(Integer... params) {
             try {
                 Thread.sleep(TIME);
@@ -159,7 +186,7 @@ public class GameStatus {
 
             synchronized (lock) {
                 t[params[0]][params[1]] = Types.NULL;
-                p.get(10).toggleBomb();
+                c.toggleBomb();
                 if (cleanTab(params[0], params[1])) {
                     thread.smellyDied();
                 }
