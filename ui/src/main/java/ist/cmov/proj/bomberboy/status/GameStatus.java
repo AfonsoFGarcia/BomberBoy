@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 
 import ist.cmov.proj.bomberboy.control.Controllable;
@@ -30,6 +31,10 @@ public class GameStatus {
         return t;
     }
 
+    public Collection<Player> getPlayers() {
+        return p.values();
+    }
+
     public GameStatus() {
         p = new HashMap<Integer, Player>();
         r = new HashMap<Integer, Robot>();
@@ -43,6 +48,12 @@ public class GameStatus {
     private void createPlayer() {
         t[1][1] = Types.PERSON;
         p.put(10, new Player(1, 1));
+    }
+
+    public void beginGame() {
+        for (Robot r : this.r.values()) {
+            r.start();
+        }
     }
 
     private void setMap(Types[][] types) {

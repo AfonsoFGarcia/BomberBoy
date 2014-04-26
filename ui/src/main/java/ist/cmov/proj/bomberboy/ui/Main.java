@@ -31,6 +31,7 @@ public class Main extends Activity {
 
     private void getName() {
         getName("Enter your name");
+        g.beginGame();
     }
 
     private void getName(String title) {
