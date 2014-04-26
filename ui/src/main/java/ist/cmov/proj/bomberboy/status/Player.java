@@ -3,13 +3,13 @@ package ist.cmov.proj.bomberboy.status;
 /**
  * Created by agfrg on 31/03/14.
  */
-public class Pair {
+public class Player {
     public Integer x;
     public Integer y;
     public Boolean bomb;
     public Boolean dead;
 
-    public Pair(Integer x, Integer y) {
+    public Player(Integer x, Integer y) {
         this.x = x;
         this.y = y;
         this.bomb = false;

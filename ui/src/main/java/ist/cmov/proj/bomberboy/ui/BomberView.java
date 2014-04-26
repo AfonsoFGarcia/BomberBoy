@@ -14,6 +14,7 @@ import android.view.SurfaceView;
 import java.util.HashMap;
 
 import ist.cmov.proj.bomberboy.status.GameStatus;
+import ist.cmov.proj.bomberboy.status.SettingsReader;
 import ist.cmov.proj.bomberboy.status.Types;
 
 /**
@@ -97,7 +98,8 @@ public class BomberView extends SurfaceView implements SurfaceHolder.Callback {
 
                     alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            status = new GameStatus(main.getStartMap());
+                            status = new GameStatus();
+                            status.initializeGameStatus(SettingsReader.getMap());
                             status.addBomberThread(getThis());
                             main.setGameStatus(status);
                         }

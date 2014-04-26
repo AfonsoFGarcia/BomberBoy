@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -19,7 +18,7 @@ import java.util.HashMap;
 
 import ist.cmov.proj.bomberboy.status.GameStatus;
 import ist.cmov.proj.bomberboy.status.Movements;
-import ist.cmov.proj.bomberboy.status.ReadMap;
+import ist.cmov.proj.bomberboy.status.SettingsReader;
 import ist.cmov.proj.bomberboy.status.Types;
 
 public class Main extends Activity {
@@ -30,7 +29,6 @@ public class Main extends Activity {
     protected GameStatus g;
     protected HashMap<Types, Bitmap> bitmaps;
     protected static int SIZE = GameStatus.SIZE;
-    protected Types[][] map;
 
     private void getName() {
         getName("Enter your name");
@@ -62,14 +60,9 @@ public class Main extends Activity {
         this.g = g;
     }
 
-    public Types[][] getStartMap() {
-        return map;
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d("ACTIVITY", "onResume");
         game.toggleRunning();
     }
 
@@ -87,9 +80,11 @@ public class Main extends Activity {
 
         setContentView(R.layout.activity_main);
         game = (BomberView) findViewById(R.id.gameView);
+
+        g = new GameStatus();
+
         BufferedReader l = new BufferedReader(new InputStreamReader(getResources().openRawResource(R.raw.l1)));
-        map = ReadMap.getMap(l);
-        g = new GameStatus(map);
+        SettingsReader.readSettings(l, g);
 
         game.startThread(getApplicationContext(), SIZE, g, this);
 
@@ -216,7 +211,6 @@ public class Main extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d("ACTIVITY", "onPause");
         game.toggleRunning();
         game.invalidate();
     }
