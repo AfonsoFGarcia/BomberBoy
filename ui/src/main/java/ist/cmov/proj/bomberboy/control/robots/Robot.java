@@ -36,12 +36,16 @@ public class Robot extends Thread implements Controllable {
         return id;
     }
 
+    private Double getDistance(Player p) {
+        return Math.abs(Math.sqrt(Math.pow(p.getX() - getX(), 2) + Math.pow(p.getY() - getY(), 2)));
+    }
+
     private Player getClosestPlayer() {
         Player player = null;
         Double currentDistance = 0d;
 
         for (Player p : status.getPlayers()) {
-            Double cD = Math.abs(Math.sqrt(Math.pow(p.getX(), 2) + Math.pow(p.getY(), 2)) - Math.sqrt(Math.pow(getX(), 2) + Math.pow(getY(), 2)));
+            Double cD = getDistance(p);
             if (player == null) {
                 player = p;
                 currentDistance = cD;
@@ -61,7 +65,7 @@ public class Robot extends Thread implements Controllable {
                 Thread.sleep(SLEEPTIME);
                 Player p = getClosestPlayer();
                 Quadrant closest = Quadrant.getQuadrant(p, this);
-                Double cD = Math.abs(Math.sqrt(Math.pow(p.getX(), 2) + Math.pow(p.getY(), 2)) - Math.sqrt(Math.pow(getX(), 2) + Math.pow(getY(), 2)));
+                Double cD = getDistance(p);
 
                 if (cD < THRESHOLD) dropBomb();
 
