@@ -67,6 +67,12 @@ public class Main extends Activity {
         game.toggleRunning();
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        finish();
+    }
+
     public void getPlayer() {
         me = g.getPlayer();
     }
