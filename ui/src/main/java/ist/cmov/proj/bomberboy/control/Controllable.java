@@ -11,6 +11,8 @@ public interface Controllable {
 
     public int getY();
 
+    public int getID();
+
     public void interrupt();
 
     public boolean move(Movements e);
@@ -28,4 +30,6 @@ public interface Controllable {
     public void incrY();
 
     public void decrY();
+
+    public void increaseScore(int points);
 }

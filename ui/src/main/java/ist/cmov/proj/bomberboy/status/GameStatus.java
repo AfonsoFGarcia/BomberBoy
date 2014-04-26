@@ -254,11 +254,12 @@ public class GameStatus {
     }
 
     private class BlowBombTask extends AsyncTask<Integer, Void, Void> {
-        private Controllable c;
+        private Controllable controllable;
 
         public BlowBombTask(Controllable c) {
-            this.c = c;
+            this.controllable = c;
         }
+
         protected Void doInBackground(Integer... params) {
             try {
                 Thread.sleep(TIMETOBLOW);
@@ -268,7 +269,7 @@ public class GameStatus {
 
             synchronized (lock) {
                 t[params[0]][params[1]] = Types.EXPLOSION;
-                c.toggleBomb();
+                controllable.toggleBomb();
                 if (cleanTab(params[0], params[1])) {
                     thread.smellyDied();
                     GAMEOVER = true;
@@ -300,8 +301,13 @@ public class GameStatus {
 
             for (Controllable c : controllables) {
                 if (c.getX() == x && c.getY() == y) {
-                    if (c instanceof Player) {
+
+                    if (c instanceof Player && c.getID() == controllable.getID()) {
                         returnValue = true;
+                    } else if (c instanceof Robot) {
+                        controllable.increaseScore(SettingsReader.getSettings().getPointsPerRobot());
+                    } else {
+                        controllable.increaseScore(SettingsReader.getSettings().getPointsPerPlayer());
                     }
                     c.interrupt();
                 }

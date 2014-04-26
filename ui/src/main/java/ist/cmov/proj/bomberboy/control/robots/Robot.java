@@ -29,6 +29,9 @@ public class Robot extends Thread implements Controllable {
         this.bomb = false;
     }
 
+    public void increaseScore(int points) {
+    }
+
     public void initializeSettings() {
         SLEEPTIME = (1 / SettingsReader.getSettings().getRobotSpeed()) * 1000;
     }
@@ -37,7 +40,7 @@ public class Robot extends Thread implements Controllable {
         this.id = id;
     }
 
-    public Integer getID() {
+    public int getID() {
         return id;
     }
 

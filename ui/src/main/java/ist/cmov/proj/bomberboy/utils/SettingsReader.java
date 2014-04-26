@@ -11,6 +11,7 @@ import ist.cmov.proj.bomberboy.control.players.Player;
 import ist.cmov.proj.bomberboy.control.robots.Robot;
 import ist.cmov.proj.bomberboy.status.GameStatus;
 import ist.cmov.proj.bomberboy.status.Types;
+import ist.cmov.proj.bomberboy.ui.Main;
 
 public class SettingsReader {
     private static ArrayList<Robot> robots;
@@ -21,7 +22,7 @@ public class SettingsReader {
         return settings;
     }
 
-    public static void readSettings(BufferedReader reader, GameStatus status) throws NoSuchTypeException {
+    public static void readSettings(BufferedReader reader, GameStatus status, Main main) throws NoSuchTypeException {
 
         robots = new ArrayList<Robot>();
         players = new Stack<Player>();
@@ -40,7 +41,7 @@ public class SettingsReader {
         Types[][] map = new Types[status.SIZE][status.SIZE];
 
         for (int i = 9; i < mapStrings.size(); i++) {
-            parseString(mapStrings.get(i), map[i - 9], status, i - 9);
+            parseString(mapStrings.get(i), map[i - 9], status, i - 9, main);
         }
 
         SettingsReader.settings = new GameSettings(mapStrings.get(0),
@@ -56,7 +57,7 @@ public class SettingsReader {
         status.initializeGameStatus(settings);
     }
 
-    private static void parseString(String l, Types[] typeMap, GameStatus s, int x) throws NoSuchTypeException {
+    private static void parseString(String l, Types[] typeMap, GameStatus s, int x, Main main) throws NoSuchTypeException {
         for (int y = 0; y < l.length(); y++) {
             char p = l.charAt(y);
             if (p == '-') {
@@ -70,7 +71,7 @@ public class SettingsReader {
                 robots.add(new Robot(s, x, y));
             } else if (p == 'P') {
                 typeMap[y] = Types.NULL;
-                players.push(new Player(x, y, s));
+                players.push(new Player(x, y, s, main));
             } else {
                 throw new NoSuchTypeException(p);
             }

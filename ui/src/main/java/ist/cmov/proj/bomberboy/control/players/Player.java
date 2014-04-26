@@ -3,6 +3,7 @@ package ist.cmov.proj.bomberboy.control.players;
 import ist.cmov.proj.bomberboy.control.Controllable;
 import ist.cmov.proj.bomberboy.status.GameStatus;
 import ist.cmov.proj.bomberboy.status.Movements;
+import ist.cmov.proj.bomberboy.ui.Main;
 
 /**
  * Created by agfrg on 31/03/14.
@@ -14,25 +15,43 @@ public class Player implements Controllable {
     public Boolean dead;
     private GameStatus status;
     private Integer id;
+    private Integer points;
+    private Main mainActivity;
 
-    public Player(Integer x, Integer y, GameStatus status) {
+    public Player(Integer x, Integer y, GameStatus status, Main mainActivity) {
         this.x = x;
         this.y = y;
         this.bomb = false;
         this.dead = false;
         this.status = status;
+        this.points = 0;
+        this.mainActivity = mainActivity;
+    }
+
+    public void increaseScore(int points) {
+        this.points += points;
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mainActivity.setPoints(getScore().toString());
+            }
+        });
+    }
+
+    public Integer getScore() {
+        return points;
     }
 
     public Player(Player other, GameStatus status) {
-        this.x = other.x;
-        this.y = other.y;
-        this.bomb = false;
-        this.dead = false;
-        this.status = status;
+        this(other.x, other.y, status, other.mainActivity);
     }
 
     public void setID(Integer id) {
         this.id = id;
+    }
+
+    public int getID() {
+        return id;
     }
 
     public void incrX() {

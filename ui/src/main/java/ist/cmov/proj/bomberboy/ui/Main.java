@@ -75,6 +75,12 @@ public class Main extends Activity {
 
     public void getPlayer() {
         me = g.getPlayer();
+        setPoints(me.getScore().toString());
+    }
+
+    public void setPoints(String playerScore) {
+        TextView player = (TextView) findViewById(R.id.playerScore);
+        player.setText(playerScore);
     }
 
     @Override
@@ -89,7 +95,7 @@ public class Main extends Activity {
         BufferedReader l = new BufferedReader(new InputStreamReader(getResources().openRawResource(R.raw.l1)));
 
         try {
-            SettingsReader.readSettings(l, g);
+            SettingsReader.readSettings(l, g, this);
         } catch (NoSuchTypeException e) {
             System.err.println(e.getClass().getCanonicalName() + ": " + e.getMessage());
             e.printStackTrace();
