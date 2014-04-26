@@ -13,12 +13,13 @@ import ist.cmov.proj.bomberboy.control.players.Player;
 import ist.cmov.proj.bomberboy.control.robots.Robot;
 import ist.cmov.proj.bomberboy.ui.BomberView;
 import ist.cmov.proj.bomberboy.utils.GameSettings;
+import ist.cmov.proj.bomberboy.utils.SettingsReader;
 
 public class GameStatus {
 
     public static int SIZE = 19;
-    private static int RANGE = 8;
-    protected static int TIME = 5000;
+    private int RANGE;
+    protected int TIMETOBLOW;
     protected Object lock = new Object();
     private Types[][] t;
     private HashMap<Integer, Player> p;
@@ -41,6 +42,14 @@ public class GameStatus {
     public GameStatus() {
         p = new HashMap<Integer, Player>();
         r = new HashMap<Integer, Robot>();
+    }
+
+    public void initializeSettings() {
+        RANGE = SettingsReader.getSettings().getExplosionRange();
+        TIMETOBLOW = SettingsReader.getSettings().getExplosionTimeout() * 1000;
+        for (Robot robot : r.values()) {
+            robot.initializeSettings();
+        }
     }
 
     private void registerRobot(Robot robot) {
@@ -234,7 +243,7 @@ public class GameStatus {
         }
         protected Void doInBackground(Integer... params) {
             try {
-                Thread.sleep(TIME);
+                Thread.sleep(TIMETOBLOW);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

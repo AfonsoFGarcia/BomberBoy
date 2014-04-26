@@ -96,6 +96,8 @@ public class Main extends Activity {
             System.exit(-1);
         }
 
+        g.initializeSettings();
+
         getPlayer();
 
         game.startThread(getApplicationContext(), GameStatus.SIZE, g, this);

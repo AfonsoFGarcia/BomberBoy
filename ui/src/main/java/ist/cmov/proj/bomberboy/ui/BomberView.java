@@ -24,7 +24,7 @@ public class BomberView extends SurfaceView implements SurfaceHolder.Callback {
     private BomberThread thread;
     private boolean running = false;
     private boolean started = false;
-    private int size = 1064;
+    private int SIZE = 1064;
     protected Main main;
 
     public class BomberThread extends Thread {
@@ -146,7 +146,7 @@ public class BomberView extends SurfaceView implements SurfaceHolder.Callback {
     public void startThread(Context context, int s, GameStatus ss, Main main) {
         this.main = main;
         if (thread == null)
-            thread = new BomberThread(getHolder(), context, size / s, s, ss);
+            thread = new BomberThread(getHolder(), context, SIZE / s, s, ss);
     }
 
     @Override
@@ -185,6 +185,6 @@ public class BomberView extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public void onSizeChanged(int xNew, int yNew, int xOld, int yOld) {
         super.onSizeChanged(xNew, yNew, xOld, yOld);
-        size = xNew;
+        SIZE = xNew;
     }
 }

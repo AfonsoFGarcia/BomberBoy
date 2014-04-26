@@ -4,13 +4,14 @@ import ist.cmov.proj.bomberboy.control.Controllable;
 import ist.cmov.proj.bomberboy.control.players.Player;
 import ist.cmov.proj.bomberboy.status.GameStatus;
 import ist.cmov.proj.bomberboy.status.Movements;
+import ist.cmov.proj.bomberboy.utils.SettingsReader;
 
 /**
  * Created by agfrg on 26/04/14.
  */
 public class Robot extends Thread implements Controllable {
 
-    private static int SLEEPTIME = 1000;
+    private static double SLEEPTIME;
     private static int THRESHOLD = 5;
 
     private GameStatus status;
@@ -26,6 +27,10 @@ public class Robot extends Thread implements Controllable {
         this.y = y;
         this.dead = false;
         this.bomb = false;
+    }
+
+    public void initializeSettings() {
+        SLEEPTIME = (1 / SettingsReader.getSettings().getRobotSpeed()) * 1000;
     }
 
     public void setID(Integer id) {
@@ -62,7 +67,7 @@ public class Robot extends Thread implements Controllable {
     public void run() {
         while (!dead) {
             try {
-                Thread.sleep(SLEEPTIME);
+                Thread.sleep((long) SLEEPTIME);
                 Player p = getClosestPlayer();
                 Quadrant closest = Quadrant.getQuadrant(p, this);
                 Double cD = getDistance(p);

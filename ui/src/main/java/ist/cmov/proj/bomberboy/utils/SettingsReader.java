@@ -48,7 +48,7 @@ public class SettingsReader {
                 Integer.parseInt(mapStrings.get(2).substring(3)),
                 Integer.parseInt(mapStrings.get(3).substring(3)),
                 Integer.parseInt(mapStrings.get(4).substring(3)),
-                Integer.parseInt(mapStrings.get(5).substring(3)),
+                Double.parseDouble(mapStrings.get(5).substring(3)),
                 Integer.parseInt(mapStrings.get(6).substring(3)),
                 Integer.parseInt(mapStrings.get(7).substring(3)),
                 map, robots, players);
