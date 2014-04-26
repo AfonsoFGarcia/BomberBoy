@@ -139,7 +139,7 @@ public class GameStatus {
     }
 
     private boolean emptyPosition(int x, int y) {
-        return t[x][y].equals(Types.NULL) || t[x][y].equals(Types.EXPLOSION);
+        return t[x][y].equals(Types.NULL) || t[x][y].equals(Types.EXPLOSION) || t[x][y].equals(Types.EXPLOSIONANDBOMB);
     }
 
     private boolean diedInNuclearFallout(Controllable c) {
@@ -319,64 +319,84 @@ public class GameStatus {
         private void cleanExplosion(int x, int y) {
             for (int i = 0; i < RANGE; i++) {
                 if (y + i < SIZE && !t[x][y + i].equals(Types.WALL)) {
-                    t[x][y + i] = Types.NULL;
+                    cleanExplosionAux(x, y + i);
                 } else {
                     break;
                 }
             }
-            for (int i = 0; i < RANGE; i++) {
+            for (int i = 1; i < RANGE; i++) {
                 if (x + i < SIZE && !t[x + i][y].equals(Types.WALL)) {
-                    t[x + i][y] = Types.NULL;
+                    cleanExplosionAux(x + i, y);
                 } else {
                     break;
                 }
             }
-            for (int i = 0; i < RANGE; i++) {
+            for (int i = 1; i < RANGE; i++) {
                 if (y - i >= 0 && !t[x][y - i].equals(Types.WALL)) {
-                    t[x][y - i] = Types.NULL;
+                    cleanExplosionAux(x, y - i);
                 } else {
                     break;
                 }
             }
-            for (int i = 0; i < RANGE; i++) {
+            for (int i = 1; i < RANGE; i++) {
                 if (x - i >= 0 && !t[x - i][y].equals(Types.WALL)) {
-                    t[x - i][y] = Types.NULL;
+                    cleanExplosionAux(x - i, y);
                 } else {
                     break;
                 }
             }
         }
 
+        private void setExplosion(int x, int y) {
+            if (t[x][y].equals(Types.BOMB)) {
+                t[x][y] = Types.EXPLOSIONANDBOMB;
+            } else {
+                t[x][y] = Types.EXPLOSION;
+            }
+        }
+
+        private void cleanExplosionAux(int x, int y) {
+            if (t[x][y].equals(Types.EXPLOSIONANDBOMB)) {
+                t[x][y] = Types.BOMB;
+            } else {
+                t[x][y] = Types.NULL;
+            }
+        }
+
         private boolean cleanTab(int x, int y) {
             boolean returnValue = false;
-            for (int i = 0; i < RANGE; i++) {
+
+            returnValue = returnValue || killControllables(x, y);
+            t[x][y] = Types.EXPLOSION;
+
+            for (int i = 1; i < RANGE; i++) {
                 if (y + i < SIZE && !t[x][y + i].equals(Types.WALL)) {
                     returnValue = returnValue || killControllables(x, y + i);
-                    t[x][y + i] = Types.EXPLOSION;
+                    setExplosion(x, y + i);
                 } else {
                     break;
                 }
             }
-            for (int i = 0; i < RANGE; i++) {
+            for (int i = 1; i < RANGE; i++) {
                 if (x + i < SIZE && !t[x + i][y].equals(Types.WALL)) {
                     returnValue = returnValue || killControllables(x + i, y);
-                    t[x + i][y] = Types.EXPLOSION;
+                    setExplosion(x + i, y);
                 } else {
                     break;
                 }
             }
-            for (int i = 0; i < RANGE; i++) {
+            for (int i = 1; i < RANGE; i++) {
                 if (y - i >= 0 && !t[x][y - i].equals(Types.WALL)) {
                     returnValue = returnValue || killControllables(x, y - i);
-                    t[x][y - i] = Types.EXPLOSION;
+                    setExplosion(x, y - i);
                 } else {
                     break;
                 }
             }
-            for (int i = 0; i < RANGE; i++) {
+            for (int i = 1; i < RANGE; i++) {
                 if (x - i >= 0 && !t[x - i][y].equals(Types.WALL)) {
                     returnValue = returnValue || killControllables(x - i, y);
-                    t[x - i][y] = Types.EXPLOSION;
+                    setExplosion(x - i, y);
                 } else {
                     break;
                 }
