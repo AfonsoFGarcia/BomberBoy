@@ -54,6 +54,7 @@ public class BomberView extends SurfaceView implements SurfaceHolder.Callback {
             bitmaps.put(Types.ROBOTANDBOMB, bitmaps.get(Types.ROBOT));
             bitmaps.put(Types.WALL, BitmapFactory.decodeResource(getResources(), R.drawable.wall));
             bitmaps.put(Types.NULL, BitmapFactory.decodeResource(getResources(), R.drawable.grass));
+            bitmaps.put(Types.EXPLOSION, BitmapFactory.decodeResource(getResources(), R.drawable.explosion));
 
             status.addBomberThread(this);
         }

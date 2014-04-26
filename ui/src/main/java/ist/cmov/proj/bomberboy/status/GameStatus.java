@@ -20,6 +20,7 @@ public class GameStatus {
     public static int SIZE = 19;
     private int RANGE;
     protected int TIMETOBLOW;
+    protected int TIMEOFBLOW;
     protected Object lock = new Object();
     private Types[][] t;
     private HashMap<Integer, Player> p;
@@ -47,6 +48,7 @@ public class GameStatus {
     public void initializeSettings() {
         RANGE = SettingsReader.getSettings().getExplosionRange();
         TIMETOBLOW = SettingsReader.getSettings().getExplosionTimeout() * 1000;
+        TIMEOFBLOW = SettingsReader.getSettings().getExplosionDuration() * 1000;
         for (Robot robot : r.values()) {
             robot.initializeSettings();
         }
@@ -134,7 +136,7 @@ public class GameStatus {
     }
 
     private boolean emptyPosition(int x, int y) {
-        return t[x][y].equals(Types.NULL);
+        return t[x][y].equals(Types.NULL) || t[x][y].equals(Types.EXPLOSION);
     }
 
     private void moveClean(Player c) {
@@ -249,11 +251,22 @@ public class GameStatus {
             }
 
             synchronized (lock) {
-                t[params[0]][params[1]] = Types.NULL;
+                t[params[0]][params[1]] = Types.EXPLOSION;
                 c.toggleBomb();
                 if (cleanTab(params[0], params[1])) {
                     thread.smellyDied();
                 }
+            }
+
+            try {
+                Thread.sleep(TIMEOFBLOW);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            synchronized (lock) {
+                t[params[0]][params[1]] = Types.EXPLOSION;
+                cleanExplosion(params[0], params[1]);
             }
 
             return null;
@@ -278,11 +291,9 @@ public class GameStatus {
             return returnValue;
         }
 
-        private boolean cleanTab(int x, int y) {
-            boolean returnValue = false;
+        private void cleanExplosion(int x, int y) {
             for (int i = 0; i < RANGE; i++) {
                 if (y + i < SIZE && !t[x][y + i].equals(Types.WALL)) {
-                    returnValue = returnValue || killControllables(x, y + i);
                     t[x][y + i] = Types.NULL;
                 } else {
                     break;
@@ -290,7 +301,6 @@ public class GameStatus {
             }
             for (int i = 0; i < RANGE; i++) {
                 if (x + i < SIZE && !t[x + i][y].equals(Types.WALL)) {
-                    returnValue = returnValue || killControllables(x + i, y);
                     t[x + i][y] = Types.NULL;
                 } else {
                     break;
@@ -298,7 +308,6 @@ public class GameStatus {
             }
             for (int i = 0; i < RANGE; i++) {
                 if (y - i >= 0 && !t[x][y - i].equals(Types.WALL)) {
-                    returnValue = returnValue || killControllables(x, y - i);
                     t[x][y - i] = Types.NULL;
                 } else {
                     break;
@@ -306,8 +315,43 @@ public class GameStatus {
             }
             for (int i = 0; i < RANGE; i++) {
                 if (x - i >= 0 && !t[x - i][y].equals(Types.WALL)) {
-                    returnValue = returnValue || killControllables(x - i, y);
                     t[x - i][y] = Types.NULL;
+                } else {
+                    break;
+                }
+            }
+        }
+
+        private boolean cleanTab(int x, int y) {
+            boolean returnValue = false;
+            for (int i = 0; i < RANGE; i++) {
+                if (y + i < SIZE && !t[x][y + i].equals(Types.WALL)) {
+                    returnValue = returnValue || killControllables(x, y + i);
+                    t[x][y + i] = Types.EXPLOSION;
+                } else {
+                    break;
+                }
+            }
+            for (int i = 0; i < RANGE; i++) {
+                if (x + i < SIZE && !t[x + i][y].equals(Types.WALL)) {
+                    returnValue = returnValue || killControllables(x + i, y);
+                    t[x + i][y] = Types.EXPLOSION;
+                } else {
+                    break;
+                }
+            }
+            for (int i = 0; i < RANGE; i++) {
+                if (y - i >= 0 && !t[x][y - i].equals(Types.WALL)) {
+                    returnValue = returnValue || killControllables(x, y - i);
+                    t[x][y - i] = Types.EXPLOSION;
+                } else {
+                    break;
+                }
+            }
+            for (int i = 0; i < RANGE; i++) {
+                if (x - i >= 0 && !t[x - i][y].equals(Types.WALL)) {
+                    returnValue = returnValue || killControllables(x - i, y);
+                    t[x - i][y] = Types.EXPLOSION;
                 } else {
                     break;
                 }
