@@ -16,7 +16,8 @@ import java.io.InputStreamReader;
 import ist.cmov.proj.bomberboy.control.players.Player;
 import ist.cmov.proj.bomberboy.status.GameStatus;
 import ist.cmov.proj.bomberboy.status.Movements;
-import ist.cmov.proj.bomberboy.status.SettingsReader;
+import ist.cmov.proj.bomberboy.utils.NoSuchTypeException;
+import ist.cmov.proj.bomberboy.utils.SettingsReader;
 
 public class Main extends Activity {
 
@@ -76,7 +77,14 @@ public class Main extends Activity {
         g = new GameStatus();
 
         BufferedReader l = new BufferedReader(new InputStreamReader(getResources().openRawResource(R.raw.l1)));
-        SettingsReader.readSettings(l, g);
+
+        try {
+            SettingsReader.readSettings(l, g);
+        } catch (NoSuchTypeException e) {
+            System.err.println(e.getClass().getCanonicalName() + ": " + e.getMessage());
+            e.printStackTrace();
+            System.exit(-1);
+        }
 
         me = g.getPlayer();
 

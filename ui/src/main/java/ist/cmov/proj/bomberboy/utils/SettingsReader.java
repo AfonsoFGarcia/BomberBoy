@@ -1,4 +1,4 @@
-package ist.cmov.proj.bomberboy.status;
+package ist.cmov.proj.bomberboy.utils;
 
 import android.util.Log;
 
@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import ist.cmov.proj.bomberboy.control.robots.Robot;
+import ist.cmov.proj.bomberboy.status.GameStatus;
+import ist.cmov.proj.bomberboy.status.Types;
 
 public class SettingsReader {
     private static Types[][] map;
@@ -20,7 +22,7 @@ public class SettingsReader {
         return robots;
     }
 
-    public static void readSettings(BufferedReader reader, GameStatus status) {
+    public static void readSettings(BufferedReader reader, GameStatus status) throws NoSuchTypeException {
         ArrayList<String> map = new ArrayList<String>();
         try {
             String s = reader.readLine();
@@ -41,7 +43,7 @@ public class SettingsReader {
         status.initializeGameStatus(SettingsReader.map, SettingsReader.robots);
     }
 
-    private static void parseString(String l, Types[] typeMap, GameStatus s, int x) {
+    private static void parseString(String l, Types[] typeMap, GameStatus s, int x) throws NoSuchTypeException {
         for (int y = 0; y < l.length(); y++) {
             char p = l.charAt(y);
             if (p == '-') {
@@ -53,6 +55,8 @@ public class SettingsReader {
             } else if (p == 'R') {
                 typeMap[y] = Types.ROBOT;
                 robots.add(new Robot(s, x, y));
+            } else {
+                throw new NoSuchTypeException(p);
             }
         }
     }

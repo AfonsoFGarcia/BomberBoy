@@ -14,8 +14,8 @@ import android.view.SurfaceView;
 import java.util.HashMap;
 
 import ist.cmov.proj.bomberboy.status.GameStatus;
-import ist.cmov.proj.bomberboy.status.SettingsReader;
 import ist.cmov.proj.bomberboy.status.Types;
+import ist.cmov.proj.bomberboy.utils.SettingsReader;
 
 /**
  * Created by agfrg on 09/04/14.
