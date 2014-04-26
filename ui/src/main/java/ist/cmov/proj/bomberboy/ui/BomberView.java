@@ -49,9 +49,12 @@ public class BomberView extends SurfaceView implements SurfaceHolder.Callback {
             bitmaps.put(Types.BARRIER, BitmapFactory.decodeResource(getResources(), R.drawable.barrier));
             bitmaps.put(Types.BOMB, BitmapFactory.decodeResource(getResources(), R.drawable.bomb));
             bitmaps.put(Types.PERSON, BitmapFactory.decodeResource(getResources(), R.drawable.person));
+            bitmaps.put(Types.PERSONANDBOMB, bitmaps.get(Types.PERSON));
+            bitmaps.put(Types.ROBOT, BitmapFactory.decodeResource(getResources(), R.drawable.robot));
+            bitmaps.put(Types.ROBOTANDBOMB, bitmaps.get(Types.ROBOT));
             bitmaps.put(Types.WALL, BitmapFactory.decodeResource(getResources(), R.drawable.wall));
             bitmaps.put(Types.NULL, BitmapFactory.decodeResource(getResources(), R.drawable.grass));
-            bitmaps.put(Types.PERSONANDBOMB, bitmaps.get(Types.PERSON));
+
             status.addBomberThread(this);
         }
 
@@ -99,7 +102,7 @@ public class BomberView extends SurfaceView implements SurfaceHolder.Callback {
                     alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
                             status = new GameStatus();
-                            status.initializeGameStatus(SettingsReader.getMap());
+                            status.initializeGameStatus(SettingsReader.getMap(), SettingsReader.getRobots());
                             status.addBomberThread(getThis());
                             main.setGameStatus(status);
                         }

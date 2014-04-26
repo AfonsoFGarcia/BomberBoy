@@ -1,11 +1,12 @@
-package ist.cmov.proj.bomberboy.robots;
+package ist.cmov.proj.bomberboy.control.robots;
 
+import ist.cmov.proj.bomberboy.control.Controllable;
 import ist.cmov.proj.bomberboy.status.GameStatus;
 
 /**
  * Created by agfrg on 26/04/14.
  */
-public class Robot extends Thread {
+public class Robot extends Thread implements Controllable {
 
     private static int SLEEPTIME = 1000;
 
@@ -36,5 +37,13 @@ public class Robot extends Thread {
 
     private void killRobot() {
         this.dead = true;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
     }
 }

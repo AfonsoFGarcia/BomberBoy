@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,14 +68,6 @@ public class Main extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        bitmaps = new HashMap<Types, Bitmap>();
-        bitmaps.put(Types.BARRIER, BitmapFactory.decodeResource(getResources(), R.drawable.barrier));
-        bitmaps.put(Types.BOMB, BitmapFactory.decodeResource(getResources(), R.drawable.bomb));
-        bitmaps.put(Types.PERSON, BitmapFactory.decodeResource(getResources(), R.drawable.person));
-        bitmaps.put(Types.WALL, BitmapFactory.decodeResource(getResources(), R.drawable.wall));
-        bitmaps.put(Types.NULL, BitmapFactory.decodeResource(getResources(), R.drawable.grass));
-        bitmaps.put(Types.PERSONANDBOMB, bitmaps.get(Types.PERSON));
 
         setContentView(R.layout.activity_main);
         game = (BomberView) findViewById(R.id.gameView);
@@ -154,15 +145,16 @@ public class Main extends Activity {
         super.onWindowFocusChanged(hasFocus);
     }
 
-    /** Scales the contents of the given view so that it completely fills the given
-     *  container on one axis (that is, we're scaling isotropically).
-     *
-     *  Source code used from paper http://www.vanteon.com/downloads/Scaling_Android_Apps_White_Paper.pdf
+    /**
+     * Scales the contents of the given view so that it completely fills the given
+     * container on one axis (that is, we're scaling isotropically).
+     * <p/>
+     * Source code used from paper http://www.vanteon.com/downloads/Scaling_Android_Apps_White_Paper.pdf
      */
     private void scaleContents(View rootView, View container) {
         // Compute the scaling ratio
-        float xScale = (float)container.getWidth() / rootView.getWidth();
-        float yScale = (float)container.getHeight() / rootView.getHeight();
+        float xScale = (float) container.getWidth() / rootView.getWidth();
+        float yScale = (float) container.getHeight() / rootView.getHeight();
         float scale = Math.min(xScale, yScale);
 
         // Scale our contents
@@ -186,7 +178,7 @@ public class Main extends Activity {
 
         // If this view has margins, scale those too
         if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
-            ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams)layoutParams;
+            ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) layoutParams;
             marginParams.leftMargin *= scale;
             marginParams.rightMargin *= scale;
             marginParams.topMargin *= scale;
@@ -197,11 +189,11 @@ public class Main extends Activity {
         root.setLayoutParams(layoutParams);
 
         // Scale the view's padding
-        root.setPadding((int)(root.getPaddingLeft() * scale), (int)(root.getPaddingTop() * scale), (int)(root.getPaddingRight() * scale), (int)(root.getPaddingBottom() * scale));
+        root.setPadding((int) (root.getPaddingLeft() * scale), (int) (root.getPaddingTop() * scale), (int) (root.getPaddingRight() * scale), (int) (root.getPaddingBottom() * scale));
 
         // If the root view is a ViewGroup, scale all of its children recursively
         if (root instanceof ViewGroup) {
-            ViewGroup groupView = (ViewGroup)root;
+            ViewGroup groupView = (ViewGroup) root;
             for (int cnt = 0; cnt < groupView.getChildCount(); ++cnt) {
                 scaleViewAndChildren(groupView.getChildAt(cnt), scale);
             }

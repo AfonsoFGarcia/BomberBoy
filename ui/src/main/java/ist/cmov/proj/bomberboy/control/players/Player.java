@@ -1,9 +1,11 @@
-package ist.cmov.proj.bomberboy.status;
+package ist.cmov.proj.bomberboy.control.players;
+
+import ist.cmov.proj.bomberboy.control.Controllable;
 
 /**
  * Created by agfrg on 31/03/14.
  */
-public class Player {
+public class Player implements Controllable {
     public Integer x;
     public Integer y;
     public Boolean bomb;
@@ -36,11 +38,23 @@ public class Player {
         bomb = !bomb;
     }
 
-    public void kill() {
+    private void kill() {
         dead = true;
     }
 
     public Boolean hasBomb() {
         return bomb;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void interrupt() {
+        kill();
     }
 }

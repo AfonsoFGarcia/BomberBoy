@@ -2,8 +2,13 @@ package ist.cmov.proj.bomberboy.status;
 
 import android.os.AsyncTask;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
+import ist.cmov.proj.bomberboy.control.Controllable;
+import ist.cmov.proj.bomberboy.control.players.Player;
+import ist.cmov.proj.bomberboy.control.robots.Robot;
 import ist.cmov.proj.bomberboy.ui.BomberView;
 
 public class GameStatus {
@@ -13,7 +18,8 @@ public class GameStatus {
     protected static int TIME = 5000;
     protected Object lock = new Object();
     private Types[][] t;
-    private HashMap<Integer, Player> p = null;
+    private HashMap<Integer, Player> p;
+    private HashMap<Integer, Robot> r;
     BomberView.BomberThread thread;
 
     public void addBomberThread(BomberView.BomberThread t) {
@@ -26,6 +32,12 @@ public class GameStatus {
 
     public GameStatus() {
         p = new HashMap<Integer, Player>();
+        r = new HashMap<Integer, Robot>();
+    }
+
+    private void registerRobot(Robot robot) {
+        int rID = 20 + r.size();
+        r.put(rID, robot);
     }
 
     private void createPlayer() {
@@ -33,8 +45,18 @@ public class GameStatus {
         p.put(10, new Player(1, 1));
     }
 
-    public void initializeGameStatus(Types[][] types) {
-        t = types;
+    private void setMap(Types[][] types) {
+        t = new Types[SIZE][SIZE];
+        for (int i = 0; i < SIZE; i++) {
+            t[i] = Arrays.copyOf(types[i], types[i].length);
+        }
+    }
+
+    public void initializeGameStatus(Types[][] types, ArrayList<Robot> robots) {
+        setMap(types);
+        for (Robot robot : robots) {
+            registerRobot(robot);
+        }
         createPlayer();
     }
 
@@ -135,19 +157,30 @@ public class GameStatus {
             return null;
         }
 
-        private boolean killSmelly(int x, int y) {
-            if (p.get(10).x == x && p.get(10).y == y) {
-                p.get(10).kill();
-                return true;
+        private boolean killControllables(int x, int y) {
+            ArrayList<Controllable> controllables = new ArrayList<Controllable>();
+            controllables.addAll(r.values());
+            controllables.addAll(p.values());
+
+            boolean returnValue = false;
+
+            for (Controllable c : controllables) {
+                if (c.getX() == x && c.getY() == y) {
+                    if (c instanceof Player) {
+                        returnValue = true;
+                    }
+                    c.interrupt();
+                }
             }
-            return false;
+
+            return returnValue;
         }
 
         private boolean cleanTab(int x, int y) {
             boolean returnValue = false;
             for (int i = 0; i < RANGE; i++) {
                 if (y + i < SIZE && !t[x][y + i].equals(Types.WALL)) {
-                    returnValue = returnValue || killSmelly(x, y + i);
+                    returnValue = returnValue || killControllables(x, y + i);
                     t[x][y + i] = Types.NULL;
                 } else {
                     break;
@@ -155,7 +188,7 @@ public class GameStatus {
             }
             for (int i = 0; i < RANGE; i++) {
                 if (x + i < SIZE && !t[x + i][y].equals(Types.WALL)) {
-                    returnValue = returnValue || killSmelly(x + i, y);
+                    returnValue = returnValue || killControllables(x + i, y);
                     t[x + i][y] = Types.NULL;
                 } else {
                     break;
@@ -163,7 +196,7 @@ public class GameStatus {
             }
             for (int i = 0; i < RANGE; i++) {
                 if (y - i >= 0 && !t[x][y - i].equals(Types.WALL)) {
-                    returnValue = returnValue || killSmelly(x, y - i);
+                    returnValue = returnValue || killControllables(x, y - i);
                     t[x][y - i] = Types.NULL;
                 } else {
                     break;
@@ -171,7 +204,7 @@ public class GameStatus {
             }
             for (int i = 0; i < RANGE; i++) {
                 if (x - i >= 0 && !t[x - i][y].equals(Types.WALL)) {
-                    returnValue = returnValue || killSmelly(x - i, y);
+                    returnValue = returnValue || killControllables(x - i, y);
                     t[x - i][y] = Types.NULL;
                 } else {
                     break;

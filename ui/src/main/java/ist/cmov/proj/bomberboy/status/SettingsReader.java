@@ -6,14 +6,18 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import ist.cmov.proj.bomberboy.robots.Robot;
+import ist.cmov.proj.bomberboy.control.robots.Robot;
 
 public class SettingsReader {
     private static Types[][] map;
-    private static ArrayList<Robot> robots;
+    private static ArrayList<Robot> robots = new ArrayList<Robot>();
 
     public static Types[][] getMap() {
         return map;
+    }
+
+    public static ArrayList<Robot> getRobots() {
+        return robots;
     }
 
     public static void readSettings(BufferedReader reader, GameStatus status) {
@@ -34,7 +38,7 @@ public class SettingsReader {
             parseString(map.get(i), SettingsReader.map[i], status, i);
         }
 
-        status.initializeGameStatus(SettingsReader.map);
+        status.initializeGameStatus(SettingsReader.map, SettingsReader.robots);
     }
 
     private static void parseString(String l, Types[] typeMap, GameStatus s, int x) {
