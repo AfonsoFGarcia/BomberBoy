@@ -109,6 +109,38 @@ public class GameStatus {
         return t[x][y].equals(Types.NULL);
     }
 
+    private void moveClean(Player c) {
+        if (t[c.getX()][c.getY()].equals(Types.PERSONANDBOMB)) {
+            t[c.getX()][c.getY()] = Types.BOMB;
+        } else {
+            t[c.getX()][c.getY()] = Types.NULL;
+        }
+    }
+
+    private void moveClean(Robot c) {
+        if (t[c.getX()][c.getY()].equals(Types.ROBOTANDBOMB)) {
+            t[c.getX()][c.getY()] = Types.BOMB;
+        } else {
+            t[c.getX()][c.getY()] = Types.NULL;
+        }
+    }
+
+    private void movePlace(Player c) {
+        if (t[c.getX()][c.getY()].equals(Types.BOMB)) {
+            t[c.getX()][c.getY()] = Types.PERSONANDBOMB;
+        } else {
+            t[c.getX()][c.getY()] = Types.PERSON;
+        }
+    }
+
+    private void movePlace(Robot c) {
+        if (t[c.getX()][c.getY()].equals(Types.BOMB)) {
+            t[c.getX()][c.getY()] = Types.ROBOTANDBOMB;
+        } else {
+            t[c.getX()][c.getY()] = Types.ROBOT;
+        }
+    }
+
     public boolean move(Movements e, Integer id) {
         synchronized (lock) {
             Controllable c = null;
@@ -121,7 +153,11 @@ public class GameStatus {
 
             if (!canMove(e, c)) return false;
 
-            t[c.getX()][c.getY()] = Types.NULL;
+            if (c instanceof Player) {
+                moveClean((Player) c);
+            } else {
+                moveClean((Robot) c);
+            }
 
             if (e.equals(Movements.DOWN)) {
                 c.incrX();
@@ -134,9 +170,9 @@ public class GameStatus {
             }
 
             if (c instanceof Player) {
-                t[c.getX()][c.getY()] = Types.PERSON;
+                movePlace((Player) c);
             } else {
-                t[c.getX()][c.getY()] = Types.ROBOT;
+                movePlace((Robot) c);
             }
 
             return true;
@@ -154,7 +190,11 @@ public class GameStatus {
             }
 
             if (!c.hasBomb()) {
-                t[c.getX()][c.getY()] = Types.PERSONANDBOMB;
+                if (c instanceof Player)
+                    t[c.getX()][c.getY()] = Types.PERSONANDBOMB;
+                else
+                    t[c.getX()][c.getY()] = Types.ROBOTANDBOMB;
+
                 c.toggleBomb();
 
                 BlowBombTask task = new BlowBombTask(c);

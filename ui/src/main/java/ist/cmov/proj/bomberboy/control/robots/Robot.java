@@ -11,6 +11,7 @@ import ist.cmov.proj.bomberboy.status.Movements;
 public class Robot extends Thread implements Controllable {
 
     private static int SLEEPTIME = 1000;
+    private static int THRESHOLD = 5;
 
     private GameStatus status;
     private Integer x;
@@ -54,7 +55,12 @@ public class Robot extends Thread implements Controllable {
         while (!dead) {
             try {
                 Thread.sleep(SLEEPTIME);
-                Quadrant closest = Quadrant.getQuadrant(getClosestPlayer(), this);
+                Player p = getClosestPlayer();
+                Quadrant closest = Quadrant.getQuadrant(p, this);
+                Double cD = Math.abs(Math.sqrt(Math.pow(p.getX(), 2) + Math.pow(p.getY(), 2)) - Math.sqrt(Math.pow(getX(), 2) + Math.pow(getY(), 2)));
+
+                if (cD < THRESHOLD) dropBomb();
+
                 if (move(closest.getMoveOne())) {
                 } else if (move(closest.getMoveTwo())) {
                 } else if (move(closest.getMoveThree())) {
