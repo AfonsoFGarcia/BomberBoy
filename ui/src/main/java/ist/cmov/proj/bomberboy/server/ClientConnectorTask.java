@@ -19,7 +19,10 @@ public class ClientConnectorTask  extends AsyncTask<String, Void, Integer> {
         }
         // connect to the server and send the message
         try {
+<<<<<<< HEAD
             // hard-typed server url
+=======
+>>>>>>> 74b3c3f... The server communication classes were forgotten in the last commit. It's what happens with smell...
             Socket client = new Socket("192.168.1.7", 8086);
             PrintWriter printwriter = new PrintWriter(client.getOutputStream(), true);
             printwriter.write(strings[0]);
