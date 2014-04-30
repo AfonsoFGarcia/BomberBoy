@@ -6,14 +6,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 import ist.cmov.proj.bomberboy.control.Controllable;
 import ist.cmov.proj.bomberboy.control.players.Player;
 import ist.cmov.proj.bomberboy.control.robots.Robot;
 import ist.cmov.proj.bomberboy.ui.BomberView;
+import ist.cmov.proj.bomberboy.ui.Main;
 import ist.cmov.proj.bomberboy.utils.GameSettings;
 import ist.cmov.proj.bomberboy.utils.SettingsReader;
+import ist.cmov.proj.bomberboy.server.*;
 
 public class GameStatus {
 
@@ -24,9 +27,11 @@ public class GameStatus {
     protected static int TIMEOFBLOW;
 
     protected Object lock = new Object();
+    private Player me;
     private Types[][] t;
     private HashMap<Integer, Player> p;
     private HashMap<Integer, Robot> r;
+    private HashMap<Integer, Integer> serverIDs; // map with <localID, serverID>
     private Stack<Player> playerStack;
     BomberView.BomberThread thread;
 
@@ -45,6 +50,7 @@ public class GameStatus {
     public GameStatus() {
         p = new HashMap<Integer, Player>();
         r = new HashMap<Integer, Robot>();
+        serverIDs = new HashMap<Integer, Integer>();
     }
 
     public void initializeSettings() {
@@ -72,6 +78,7 @@ public class GameStatus {
     public Player getPlayer() {
         Player player = new Player(playerStack.pop(), this);
         createPlayer(player);
+        me = player;
         return player;
     }
 
@@ -217,6 +224,10 @@ public class GameStatus {
 
             if (c instanceof Player) {
                 movePlace((Player) c);
+                // update the server with the new position
+                int localID = c.getID();
+                String msg = "move " + serverIDs.get(localID) + " " + c.getX() + " " + c.getY();
+                new ClientConnectorTask().execute(msg);
             } else {
                 movePlace((Robot) c);
             }
@@ -251,6 +262,64 @@ public class GameStatus {
                 return false;
             }
         }
+    }
+
+    // register the player on the server
+    public void register(String name, int x, int y) {
+        me.setName(name);
+        String ipAddr = NetworkUtils.getIPAddress();
+        String msg = "register " + name + " " + ipAddr + " " + x + " " + y;
+        new ClientConnectorTask().execute(msg);
+    }
+
+    // add a new player to the game
+    public void addPlayer(String id, String name) {
+/*
+        Types playerType;
+        if (trashman.equals("1"))
+            playerType = Types.SMELLY1;
+
+        if (trashman.equals("2"))
+            playerType = Types.SMELLY2;
+
+        if (trashman.equals("3"))
+            playerType = Types.SMELLY3;*/
+
+        // TODO: there should be a method to add the Type of the player and set the name
+        int localID = 0;
+        if(!me.getName().equals(name)) {
+            Player player = getPlayer();
+            player.setName(name);
+            localID = player.getID();
+        } else {
+            localID = me.getID();
+        }
+        serverIDs.put(localID, Integer.parseInt(id));
+    }
+
+    public void moveAnotherSmelly(Integer id, String direction) {
+        int localID = 0;
+        for(Map.Entry<Integer, Integer> entry : serverIDs.entrySet()) {
+            if(id.equals(entry.getValue())) {
+                localID = entry.getKey();
+            }
+        }
+
+        Player OpSmelly = p.get(localID);
+
+        moveClean(OpSmelly);
+
+        if (direction.equals("down")) {
+            OpSmelly.incrX();
+        } else if (direction.equals("up")) {
+            OpSmelly.decrX();
+        } else if (direction.equals("left")) {
+            OpSmelly.decrY();
+        } else {
+            OpSmelly.incrY();
+        }
+        movePlace(OpSmelly);
+        Main.game.signalRedraw();
     }
 
     private class BlowBombTask extends AsyncTask<Integer, Void, Void> {
