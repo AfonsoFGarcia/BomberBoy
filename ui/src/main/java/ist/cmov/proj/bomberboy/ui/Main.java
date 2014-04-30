@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 import ist.cmov.proj.bomberboy.control.players.Player;
+import ist.cmov.proj.bomberboy.server.IncomingRequest;
 import ist.cmov.proj.bomberboy.status.GameStatus;
 import ist.cmov.proj.bomberboy.status.Movements;
 import ist.cmov.proj.bomberboy.utils.NoSuchTypeException;
@@ -21,11 +22,13 @@ import ist.cmov.proj.bomberboy.utils.SettingsReader;
 
 public class Main extends Activity {
 
-    protected BomberView game;
+    public static BomberView game;
     protected boolean scalingComplete = false;
-    protected String playerName;
-    protected GameStatus g;
+    protected String playerName = null;
+    public static GameStatus g;
+    IncomingRequest socketWrapper;
     protected Player me;
+    private int _port = 4444;
 
     private void getName() {
         getName("Enter your name");
@@ -60,6 +63,7 @@ public class Main extends Activity {
                 } else {
                     TextView player = (TextView) findViewById(R.id.playerName);
                     player.setText(playerName);
+                    g.register(playerName, me.getX(), me.getY());
                     g.beginGame();
                 }
             }
@@ -115,6 +119,8 @@ public class Main extends Activity {
 
         g.initializeSettings();
 
+        socketWrapper = new IncomingRequest(_port);
+        socketWrapper.start();
         getPlayer();
 
         game.startThread(getApplicationContext(), GameStatus.SIZE, g, this);
@@ -172,6 +178,7 @@ public class Main extends Activity {
         });
 
         getName();
+
     }
 
     @Override

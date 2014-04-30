@@ -13,6 +13,7 @@ public class Player implements Controllable {
     public Integer y;
     public Boolean bomb;
     public Boolean dead;
+    private String name;
     private GameStatus status;
     private Integer id;
     private Integer points;
@@ -49,6 +50,10 @@ public class Player implements Controllable {
     public void setID(Integer id) {
         this.id = id;
     }
+
+    public String getName() { return this.name; }
+
+    public void setName(String s) { this.name = s; }
 
     public int getID() {
         return id;
