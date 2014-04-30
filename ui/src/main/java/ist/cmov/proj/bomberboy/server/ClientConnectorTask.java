@@ -7,26 +7,20 @@ import java.net.UnknownHostException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+
 /**
  * Created by duarte on 24-04-2014.
  */
-public class ClientConnectorTask  extends AsyncTask<String, Void, Integer> {
+public class ClientConnectorTask extends AsyncTask<String, Void, Integer> {
 
-    protected Integer doInBackground(String...strings) {
+    protected Integer doInBackground(String... strings) {
         // validate input parameters
         if (strings.length <= 0) {
             return 0;
         }
         // connect to the server and send the message
         try {
-<<<<<<< HEAD
-<<<<<<< HEAD
             // hard-typed server url
-=======
->>>>>>> 74b3c3f... The server communication classes were forgotten in the last commit. It's what happens with smell...
-=======
-            // hard-typed server url
->>>>>>> 59144e3... Ghost commit before rebasing with branch develop.
             Socket client = new Socket("192.168.1.7", 8086);
             PrintWriter printwriter = new PrintWriter(client.getOutputStream(), true);
             printwriter.write(strings[0]);
@@ -42,6 +36,7 @@ public class ClientConnectorTask  extends AsyncTask<String, Void, Integer> {
         }
         return 1;
     }
+
     protected void onPostExecute(Long result) {
         return;
     }
