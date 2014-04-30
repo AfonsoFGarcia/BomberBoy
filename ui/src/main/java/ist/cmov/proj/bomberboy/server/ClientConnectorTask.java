@@ -20,9 +20,13 @@ public class ClientConnectorTask  extends AsyncTask<String, Void, Integer> {
         // connect to the server and send the message
         try {
 <<<<<<< HEAD
+<<<<<<< HEAD
             // hard-typed server url
 =======
 >>>>>>> 74b3c3f... The server communication classes were forgotten in the last commit. It's what happens with smell...
+=======
+            // hard-typed server url
+>>>>>>> 59144e3... Ghost commit before rebasing with branch develop.
             Socket client = new Socket("192.168.1.7", 8086);
             PrintWriter printwriter = new PrintWriter(client.getOutputStream(), true);
             printwriter.write(strings[0]);
