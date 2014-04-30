@@ -24,6 +24,7 @@ public class BomberView extends SurfaceView implements SurfaceHolder.Callback {
     private BomberThread thread;
     private boolean running = false;
     private boolean started = false;
+    private long timeLeft;
     private int SIZE = 1064;
     protected Main main;
 
@@ -116,6 +117,19 @@ public class BomberView extends SurfaceView implements SurfaceHolder.Callback {
                     alert.show();
                 }
             });
+        }
+
+        public void updateClock(long millis) {
+            timeLeft = millis;
+            long seconds = (millis / 1000) % 60;
+            long minutes = ((millis - seconds) / 1000) / 60;
+            String time = minutes + ":" + seconds;
+
+            main.updateClock(time);
+        }
+
+        public void decreaseTime() {
+            updateClock(timeLeft - 1000);
         }
 
         public void gameEnds() {

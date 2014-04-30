@@ -31,6 +31,17 @@ public class Main extends Activity {
         getName("Enter your name");
     }
 
+    public void updateClock(String time) {
+        final String finalTime = time;
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView player = (TextView) findViewById(R.id.timeLeft);
+                player.setText(finalTime);
+            }
+        });
+    }
+
     private void getName(String title) {
         AlertDialog.Builder alert = new AlertDialog.Builder(this, AlertDialog.THEME_HOLO_LIGHT);
         alert.setTitle(title);

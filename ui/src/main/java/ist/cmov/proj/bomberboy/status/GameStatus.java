@@ -22,6 +22,7 @@ public class GameStatus {
     protected static int RANGE;
     protected static int TIMETOBLOW;
     protected static int TIMEOFBLOW;
+    protected static ArrayList<Timer> timers = new ArrayList<Timer>();
 
     protected Object lock = new Object();
     private Types[][] t;
@@ -75,7 +76,15 @@ public class GameStatus {
         return player;
     }
 
+    protected void cancelTimers() {
+        for (Timer timer : timers) {
+            timer.cancel();
+            timer.purge();
+        }
+    }
+
     public void endGame() {
+        cancelTimers();
         for (Robot r : this.r.values()) {
             r.stopRobot();
         }
@@ -91,6 +100,9 @@ public class GameStatus {
         }
         r = rNews;
 
+        final Timer t = new Timer();
+        timers.add(t);
+
         class EndGame extends TimerTask {
             public void run() {
                 endGame();
@@ -98,8 +110,18 @@ public class GameStatus {
             }
         }
 
-        Timer t = new Timer();
         t.schedule(new EndGame(), SettingsReader.getSettings().getGameDuration() * 1000);
+        thread.updateClock(SettingsReader.getSettings().getGameDuration() * 1000);
+
+        class UpdateTime extends TimerTask {
+            public void run() {
+                thread.decreaseTime();
+            }
+        }
+
+        Timer t1 = new Timer();
+        timers.add(t1);
+        t1.scheduleAtFixedRate(new UpdateTime(), 0L, 1000L);
 
     }
 
@@ -255,7 +277,8 @@ public class GameStatus {
                 c.toggleBomb();
 
                 Timer t = new Timer();
-                t.schedule(new BlowBombTimerTask(c.getX(), c.getY(), c), SettingsReader.getSettings().getExplosionTimeout() * 1000);
+                timers.add(t);
+                t.schedule(new BlowBombTimerTask(c.getX(), c.getY(), c, t), SettingsReader.getSettings().getExplosionTimeout() * 1000);
 
                 return true;
             } else {
@@ -264,15 +287,17 @@ public class GameStatus {
         }
     }
 
-    private class BlowBombTimerTask extends TimerTask {
+    class BlowBombTimerTask extends TimerTask {
         private int x;
         private int y;
         private Controllable controllable;
+        private Timer timer;
 
-        public BlowBombTimerTask(int x, int y, Controllable c) {
+        public BlowBombTimerTask(int x, int y, Controllable c, Timer timer) {
             this.x = x;
             this.y = y;
             this.controllable = c;
+            this.timer = timer;
         }
 
         public void run() {
@@ -281,13 +306,18 @@ public class GameStatus {
                 controllable.toggleBomb();
                 if (cleanTab(x, y)) {
                     thread.smellyDied();
+                    cancelTimers();
                     GAMEOVER = true;
                 }
             }
 
+            timer.cancel();
+            timer.purge();
+
             if (!GAMEOVER) {
                 Timer t = new Timer();
-                t.schedule(new CleanBombTimerTask(x, y), SettingsReader.getSettings().getExplosionDuration() * 1000);
+                timers.add(t);
+                t.schedule(new CleanBombTimerTask(x, y, t), SettingsReader.getSettings().getExplosionDuration() * 1000);
             }
         }
 
@@ -342,7 +372,8 @@ public class GameStatus {
             for (Controllable c : controllables) {
                 if (c.getX() == x && c.getY() == y) {
 
-                    if (c instanceof Player && c.getID() == controllable.getID()) {
+                    if (c instanceof Player) {
+                        t[c.getX()][c.getY()] = Types.EXPLOSION;
                         returnValue = true;
                     } else if (c instanceof Robot) {
                         controllable.increaseScore(SettingsReader.getSettings().getPointsPerRobot());
@@ -368,10 +399,12 @@ public class GameStatus {
     private class CleanBombTimerTask extends TimerTask {
         private int x;
         private int y;
+        private Timer timer;
 
-        public CleanBombTimerTask(int x, int y) {
+        public CleanBombTimerTask(int x, int y, Timer t) {
             this.x = x;
             this.y = y;
+            this.timer = t;
         }
 
         public void run() {
@@ -379,6 +412,8 @@ public class GameStatus {
                 t[x][y] = Types.NULL;
                 cleanExplosion(x, y);
             }
+            timer.cancel();
+            timer.purge();
         }
 
         private void cleanExplosion(int x, int y) {
