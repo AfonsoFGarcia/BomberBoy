@@ -1,12 +1,12 @@
 package ist.cmov.proj.bomberboy.status;
 
-import android.os.AsyncTask;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Stack;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import ist.cmov.proj.bomberboy.control.Controllable;
 import ist.cmov.proj.bomberboy.control.players.Player;
@@ -90,6 +90,17 @@ public class GameStatus {
             rNew.start();
         }
         r = rNews;
+
+        class EndGame extends TimerTask {
+            public void run() {
+                endGame();
+                thread.gameEnds();
+            }
+        }
+
+        Timer t = new Timer();
+        t.schedule(new EndGame(), SettingsReader.getSettings().getGameDuration() * 1000);
+
     }
 
     private void setMap(Types[][] types) {
@@ -243,8 +254,8 @@ public class GameStatus {
 
                 c.toggleBomb();
 
-                BlowBombTask task = new BlowBombTask(c);
-                task.execute(c.getX(), c.getY());
+                Timer t = new Timer();
+                t.schedule(new BlowBombTimerTask(c.getX(), c.getY(), c), SettingsReader.getSettings().getExplosionTimeout() * 1000);
 
                 return true;
             } else {
@@ -253,113 +264,30 @@ public class GameStatus {
         }
     }
 
-    private class BlowBombTask extends AsyncTask<Integer, Void, Void> {
+    private class BlowBombTimerTask extends TimerTask {
+        private int x;
+        private int y;
         private Controllable controllable;
 
-        public BlowBombTask(Controllable c) {
+        public BlowBombTimerTask(int x, int y, Controllable c) {
+            this.x = x;
+            this.y = y;
             this.controllable = c;
         }
 
-        protected Void doInBackground(Integer... params) {
-            try {
-                Thread.sleep(TIMETOBLOW);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
+        public void run() {
             synchronized (lock) {
-                t[params[0]][params[1]] = Types.EXPLOSION;
+                t[x][y] = Types.EXPLOSION;
                 controllable.toggleBomb();
-                if (cleanTab(params[0], params[1])) {
+                if (cleanTab(x, y)) {
                     thread.smellyDied();
                     GAMEOVER = true;
                 }
             }
 
             if (!GAMEOVER) {
-                try {
-                    Thread.sleep(TIMEOFBLOW);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            synchronized (lock) {
-                t[params[0]][params[1]] = Types.NULL;
-                cleanExplosion(params[0], params[1]);
-            }
-
-            return null;
-        }
-
-        private boolean killControllables(int x, int y) {
-            ArrayList<Controllable> controllables = new ArrayList<Controllable>();
-            controllables.addAll(r.values());
-            controllables.addAll(p.values());
-
-            boolean returnValue = false;
-
-            for (Controllable c : controllables) {
-                if (c.getX() == x && c.getY() == y) {
-
-                    if (c instanceof Player && c.getID() == controllable.getID()) {
-                        returnValue = true;
-                    } else if (c instanceof Robot) {
-                        controllable.increaseScore(SettingsReader.getSettings().getPointsPerRobot());
-                    } else {
-                        controllable.increaseScore(SettingsReader.getSettings().getPointsPerPlayer());
-                    }
-                    c.interrupt();
-                }
-            }
-
-            return returnValue;
-        }
-
-        private void cleanExplosion(int x, int y) {
-            for (int i = 0; i < RANGE; i++) {
-                if (y + i < SIZE && !t[x][y + i].equals(Types.WALL)) {
-                    cleanExplosionAux(x, y + i);
-                } else {
-                    break;
-                }
-            }
-            for (int i = 1; i < RANGE; i++) {
-                if (x + i < SIZE && !t[x + i][y].equals(Types.WALL)) {
-                    cleanExplosionAux(x + i, y);
-                } else {
-                    break;
-                }
-            }
-            for (int i = 1; i < RANGE; i++) {
-                if (y - i >= 0 && !t[x][y - i].equals(Types.WALL)) {
-                    cleanExplosionAux(x, y - i);
-                } else {
-                    break;
-                }
-            }
-            for (int i = 1; i < RANGE; i++) {
-                if (x - i >= 0 && !t[x - i][y].equals(Types.WALL)) {
-                    cleanExplosionAux(x - i, y);
-                } else {
-                    break;
-                }
-            }
-        }
-
-        private void setExplosion(int x, int y) {
-            if (t[x][y].equals(Types.BOMB)) {
-                t[x][y] = Types.EXPLOSIONANDBOMB;
-            } else {
-                t[x][y] = Types.EXPLOSION;
-            }
-        }
-
-        private void cleanExplosionAux(int x, int y) {
-            if (t[x][y].equals(Types.EXPLOSIONANDBOMB)) {
-                t[x][y] = Types.BOMB;
-            } else {
-                t[x][y] = Types.NULL;
+                Timer t = new Timer();
+                t.schedule(new CleanBombTimerTask(x, y), SettingsReader.getSettings().getExplosionDuration() * 1000);
             }
         }
 
@@ -402,6 +330,94 @@ public class GameStatus {
                 }
             }
             return returnValue;
+        }
+
+        private boolean killControllables(int x, int y) {
+            ArrayList<Controllable> controllables = new ArrayList<Controllable>();
+            controllables.addAll(r.values());
+            controllables.addAll(p.values());
+
+            boolean returnValue = false;
+
+            for (Controllable c : controllables) {
+                if (c.getX() == x && c.getY() == y) {
+
+                    if (c instanceof Player && c.getID() == controllable.getID()) {
+                        returnValue = true;
+                    } else if (c instanceof Robot) {
+                        controllable.increaseScore(SettingsReader.getSettings().getPointsPerRobot());
+                    } else {
+                        controllable.increaseScore(SettingsReader.getSettings().getPointsPerPlayer());
+                    }
+                    c.interrupt();
+                }
+            }
+
+            return returnValue;
+        }
+
+        private void setExplosion(int x, int y) {
+            if (t[x][y].equals(Types.BOMB)) {
+                t[x][y] = Types.EXPLOSIONANDBOMB;
+            } else {
+                t[x][y] = Types.EXPLOSION;
+            }
+        }
+    }
+
+    private class CleanBombTimerTask extends TimerTask {
+        private int x;
+        private int y;
+
+        public CleanBombTimerTask(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public void run() {
+            synchronized (lock) {
+                t[x][y] = Types.NULL;
+                cleanExplosion(x, y);
+            }
+        }
+
+        private void cleanExplosion(int x, int y) {
+            for (int i = 0; i < RANGE; i++) {
+                if (y + i < SIZE && !t[x][y + i].equals(Types.WALL)) {
+                    cleanExplosionAux(x, y + i);
+                } else {
+                    break;
+                }
+            }
+            for (int i = 1; i < RANGE; i++) {
+                if (x + i < SIZE && !t[x + i][y].equals(Types.WALL)) {
+                    cleanExplosionAux(x + i, y);
+                } else {
+                    break;
+                }
+            }
+            for (int i = 1; i < RANGE; i++) {
+                if (y - i >= 0 && !t[x][y - i].equals(Types.WALL)) {
+                    cleanExplosionAux(x, y - i);
+                } else {
+                    break;
+                }
+            }
+            for (int i = 1; i < RANGE; i++) {
+                if (x - i >= 0 && !t[x - i][y].equals(Types.WALL)) {
+                    cleanExplosionAux(x - i, y);
+                } else {
+                    break;
+                }
+            }
+        }
+
+        private void cleanExplosionAux(int x, int y) {
+            if (t[x][y].equals(Types.EXPLOSIONANDBOMB)) {
+                t[x][y] = Types.BOMB;
+            } else {
+                t[x][y] = Types.NULL;
+            }
         }
     }
 }

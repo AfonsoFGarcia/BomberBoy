@@ -118,6 +118,30 @@ public class BomberView extends SurfaceView implements SurfaceHolder.Callback {
             });
         }
 
+        public void gameEnds() {
+            main.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    AlertDialog.Builder alert = new AlertDialog.Builder(main, AlertDialog.THEME_HOLO_LIGHT);
+                    alert.setCancelable(false);
+                    alert.setTitle("The game ends!");
+
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            status = new GameStatus();
+                            status.initializeGameStatus(SettingsReader.getSettings());
+                            status.addBomberThread(getThis());
+                            main.setGameStatus(status);
+                            main.getPlayer();
+                            status.beginGame();
+                        }
+                    });
+
+                    alert.show();
+                }
+            });
+        }
+
         @Override
         public void run() {
             while (run) {
