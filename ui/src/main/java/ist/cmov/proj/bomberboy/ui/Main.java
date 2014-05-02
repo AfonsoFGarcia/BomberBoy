@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -27,7 +28,7 @@ public class Main extends Activity {
     protected String playerName = null;
     public static GameStatus g;
     IncomingRequest socketWrapper;
-    protected Player me;
+    protected Player me = null;
     private int _port = 4444;
 
     private void getName() {
@@ -63,7 +64,10 @@ public class Main extends Activity {
                 } else {
                     TextView player = (TextView) findViewById(R.id.playerName);
                     player.setText(playerName);
-                    g.register(playerName, me.getX(), me.getY());
+                    register(playerName);
+                    while (me == null) {
+                    }
+                    setPoints(me.getScore().toString());
                     g.beginGame();
                 }
             }
@@ -88,9 +92,20 @@ public class Main extends Activity {
         finish();
     }
 
+    public void register(String name) {
+        g.register(name, this);
+    }
+
+    public void createPlayer(Player p) {
+        me = p;
+    }
+
     public void getPlayer() {
-        me = g.getPlayer();
-        setPoints(me.getScore().toString());
+        getName();
+    }
+
+    public String getPlayerName() {
+        return playerName;
     }
 
     public void setPoints(String playerScore) {
@@ -121,7 +136,6 @@ public class Main extends Activity {
 
         socketWrapper = new IncomingRequest(_port);
         socketWrapper.start();
-        getPlayer();
 
         game.startThread(getApplicationContext(), GameStatus.SIZE, g, this);
 
@@ -177,7 +191,7 @@ public class Main extends Activity {
             }
         });
 
-        getName();
+        getPlayer();
 
     }
 
@@ -208,7 +222,6 @@ public class Main extends Activity {
         scaleViewAndChildren(rootView, scale);
     }
 
-    @SuppressWarnings("deprecation")
     public static void scaleViewAndChildren(View root, float scale) {
         // Retrieve the view's layout information
         ViewGroup.LayoutParams layoutParams = root.getLayoutParams();
@@ -216,10 +229,10 @@ public class Main extends Activity {
 
         // Scale the view itself
         assert layoutParams != null;
-        if (layoutParams.width != ViewGroup.LayoutParams.FILL_PARENT && layoutParams.width != ViewGroup.LayoutParams.WRAP_CONTENT) {
+        if (layoutParams.width != ViewGroup.LayoutParams.MATCH_PARENT && layoutParams.width != ViewGroup.LayoutParams.WRAP_CONTENT) {
             layoutParams.width *= scale;
         }
-        if (layoutParams.height != ViewGroup.LayoutParams.FILL_PARENT && layoutParams.height != ViewGroup.LayoutParams.WRAP_CONTENT) {
+        if (layoutParams.height != ViewGroup.LayoutParams.MATCH_PARENT && layoutParams.height != ViewGroup.LayoutParams.WRAP_CONTENT) {
             layoutParams.height *= scale;
         }
 

@@ -19,6 +19,17 @@ public class Player implements Controllable {
     private Integer points;
     private Main mainActivity;
 
+    public Player(Integer id, String name, Integer x, Integer y, GameStatus status, Main mainActivity) {
+        this.id = id;
+        this.name = name;
+        this.x = x;
+        this.y = y;
+        this.status = status;
+        this.mainActivity = mainActivity;
+        this.bomb = false;
+        this.dead = false;
+        this.points = 0;
+    }
     public Player(Integer x, Integer y, GameStatus status, Main mainActivity) {
         this.x = x;
         this.y = y;

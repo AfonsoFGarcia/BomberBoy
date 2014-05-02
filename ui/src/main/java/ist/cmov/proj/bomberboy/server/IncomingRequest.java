@@ -28,33 +28,24 @@ public class IncomingRequest extends Thread {
     }
     @Override
     public void run() {
-
         while(true) {
             try {
                 clientSocket = serverSocket.accept();
-
                 inputStreamReader =
                         new InputStreamReader(clientSocket.getInputStream());
-
                 bufferedReader =
                         new BufferedReader(inputStreamReader);
-
                 String msg;
                 msg = bufferedReader.readLine();
-                while(!msg.isEmpty())
-                {
+                while (!msg.isEmpty()) {
                     System.out.println(msg);
                     parseMsg(msg);
                     msg = "";
                 }
-
-
                 inputStreamReader.close();
                 clientSocket.close();
 
-            }
-            catch (IOException ex)
-            {
+            } catch (IOException ex) {
                 System.out.println("Problem in message reading");
                 break;
             }
@@ -65,17 +56,31 @@ public class IncomingRequest extends Thread {
     private void parseMsg(String msg) {
         String[] tokens = msg.split(" ");
         String command = tokens[0];
-        if(command.equals("newplayer")) {
-            String id = tokens[1];
-            String name = tokens[2];
-            Main.g.addPlayer(id, name);
-        }
 
+        if (command.equals("ackReg")) {
+            Integer id = Integer.parseInt(tokens[1]);
+            Integer xpos = Integer.parseInt(tokens[2]);
+            Integer ypos = Integer.parseInt(tokens[3]);
+            Main.g.ackReg(id, xpos, ypos);
+        }
+        if(command.equals("newplayer")) {
+            Integer id = Integer.parseInt(tokens[1]);
+            Integer xpos = Integer.parseInt(tokens[2]);
+            Integer ypos = Integer.parseInt(tokens[3]);
+            String name = tokens[4];
+            Main.g.addPlayer(id, name, xpos, ypos);
+        }
         if(command.equals("move")) {
-            String playerID = tokens[1];
+            Integer id = Integer.parseInt(tokens[1]);
             String direction = tokens[2];
-            Integer id = Integer.parseInt(playerID);
+            if (direction.equals("still"))
+                return;
             Main.g.moveAnotherSmelly(id, direction);
+        }
+        if (command.equals("robot")) {
+            Integer id = Integer.parseInt(tokens[1]);
+            Integer xpos = Integer.parseInt(tokens[2]);
+            Integer ypos = Integer.parseInt(tokens[3]);
         }
     }
 }
