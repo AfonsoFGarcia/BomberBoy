@@ -62,7 +62,7 @@ public class GameStatus {
     }
 
     private void registerRobot(Robot robot) {
-        int rID = 20 + r.size();
+        int rID = 10 + r.size();
         robot.setID(rID);
         r.put(rID, robot);
     }
@@ -101,7 +101,6 @@ public class GameStatus {
             Robot rNew = new Robot(this, r.getX(), r.getY());
             rNew.setID(r.getID());
             rNews.put(r.getID(), rNew);
-            rNew.start();
         }
         r = rNews;
 
@@ -223,20 +222,11 @@ public class GameStatus {
     public boolean move(Movements e, Integer id) {
         synchronized (lock) {
             Controllable c = null;
-
-            if (id < 5) {
-                c = p.get(id);
-            } else {
-                c = r.get(id);
-            }
+            c = p.get(id);
 
             if (!canMove(e, c)) return false;
 
-            if (c instanceof Player) {
-                moveClean((Player) c);
-            } else {
-                moveClean((Robot) c);
-            }
+            moveClean((Player) c);
 
             if (e.equals(Movements.DOWN)) {
                 c.incrX();
@@ -253,14 +243,10 @@ public class GameStatus {
                 return true;
             }
 
-            if (c instanceof Player) {
-                movePlace((Player) c);
+            movePlace((Player) c);
                 // update the server with the new position
-                String msg = "move " + c.getID() + " " + c.getX() + " " + c.getY();
-                new ClientConnectorTask().execute(msg);
-            } else {
-                movePlace((Robot) c);
-            }
+            String msg = "move " + c.getID() + " " + c.getX() + " " + c.getY();
+            new ClientConnectorTask().execute(msg);
 
             return true;
         }
@@ -350,6 +336,25 @@ public class GameStatus {
             smelly.incrY();
         }
         movePlace(smelly);
+        Main.game.signalRedraw();
+    }
+
+    public void moveRobot(Integer id, Integer xpos, Integer ypos) {
+        Robot robot = r.get(id);
+        int oldx = robot.getX();
+        int oldy = robot.getY();
+
+        if (oldx < xpos)
+            robot.incrX();
+        if (oldx > xpos)
+            robot.decrX();
+        if (oldy < ypos)
+            robot.incrY();
+        if (oldy > ypos)
+            robot.decrY();
+
+        t[oldx][oldy] = Types.NULL;
+        t[xpos][ypos] = Types.ROBOT;
         Main.game.signalRedraw();
     }
 

@@ -28,6 +28,7 @@ public class IncomingRequest extends Thread {
     }
     @Override
     public void run() {
+        String msg = "";
         while(true) {
             try {
                 clientSocket = serverSocket.accept();
@@ -35,7 +36,6 @@ public class IncomingRequest extends Thread {
                         new InputStreamReader(clientSocket.getInputStream());
                 bufferedReader =
                         new BufferedReader(inputStreamReader);
-                String msg;
                 msg = bufferedReader.readLine();
                 while (!msg.isEmpty()) {
                     System.out.println(msg);
@@ -81,6 +81,7 @@ public class IncomingRequest extends Thread {
             Integer id = Integer.parseInt(tokens[1]);
             Integer xpos = Integer.parseInt(tokens[2]);
             Integer ypos = Integer.parseInt(tokens[3]);
+            Main.g.moveRobot(id, xpos, ypos);
         }
     }
 }

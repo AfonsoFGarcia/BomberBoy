@@ -21,7 +21,7 @@ public class ClientConnectorTask extends AsyncTask<String, Void, Integer> {
         // connect to the server and send the message
         try {
             // hard-typed server url
-            Socket client = new Socket("192.168.1.7", 8086);
+            Socket client = new Socket("192.168.1.5", 8086);
             PrintWriter printwriter = new PrintWriter(client.getOutputStream(), true);
             printwriter.write(strings[0]);
             printwriter.flush();

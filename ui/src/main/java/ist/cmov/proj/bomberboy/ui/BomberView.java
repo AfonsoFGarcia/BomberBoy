@@ -10,6 +10,8 @@ import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import java.util.HashMap;
 
@@ -24,6 +26,7 @@ public class BomberView extends SurfaceView implements SurfaceHolder.Callback {
     private BomberThread thread;
     private boolean running = false;
     private boolean started = false;
+    private boolean scaled = false;
     private long timeLeft;
     private int SIZE = 1064;
     protected Main main;
@@ -82,8 +85,29 @@ public class BomberView extends SurfaceView implements SurfaceHolder.Callback {
             c.save();
         }
 
+        /**
+         * Scales the contents of the BomberView SurfaceView to the size of the device based on a
+         * fixed, hard-coded, size written in the ui activity xml layout file.
+         * <p/>
+         * Source code from: http://stackoverflow.com/questions/10707519/scaling-a-fixed-surfaceview-to-fill-vertically-and-maintain-aspect-ratio
+         */
         public void doDraw(Canvas c) {
-            setBitmap(status.getMap(), c);
+            final float scaleFactor = Math.min(getWidth() / 1064.f, getHeight() / 1064.f);
+            final float finalWidth = 1064.f * scaleFactor;
+            final float finalHeight = 1064.f * scaleFactor;
+            final float leftPadding = (getWidth() - finalWidth) / 2;
+            final float topPadding = (getHeight() - finalHeight) / 2;
+
+            final int savedState = c.save();
+            try {
+                c.clipRect(leftPadding, topPadding, leftPadding + finalWidth, topPadding + finalHeight);
+
+                c.translate(leftPadding, topPadding);
+                c.scale(scaleFactor, scaleFactor);
+                setBitmap(status.getMap(), c);
+            } finally {
+                c.restoreToCount(savedState);
+            }
         }
 
         public void signalRedraw() {
