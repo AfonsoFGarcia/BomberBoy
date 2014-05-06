@@ -20,6 +20,7 @@ import ist.cmov.proj.bomberboy.server.*;
 public class GameStatus {
 
     public static int SIZE = 19;
+    public static boolean GAMESTARTED = false;
     protected static boolean GAMEOVER = false;
     protected static int RANGE;
     protected static int TIMETOBLOW;
@@ -126,7 +127,7 @@ public class GameStatus {
         Timer t1 = new Timer();
         timers.add(t1);
         t1.scheduleAtFixedRate(new UpdateTime(), 0L, 1000L);
-
+        GAMESTARTED = true;
     }
 
     private void setMap(Types[][] types) {
@@ -204,11 +205,7 @@ public class GameStatus {
     }
 
     private void movePlace(Player c) {
-        if (t[c.getX()][c.getY()].equals(Types.BOMB)) {
-            t[c.getX()][c.getY()] = Types.PERSONANDBOMB;
-        } else {
-            t[c.getX()][c.getY()] = Types.PERSON;
-        }
+        t[c.getX()][c.getY()] = Types.PERSON;
     }
 
     private void movePlace(Robot c) {
@@ -222,7 +219,7 @@ public class GameStatus {
     public boolean move(Movements e, Integer id) {
         synchronized (lock) {
             Controllable c = null;
-            c = p.get(id);
+            c = me;
 
             if (!canMove(e, c)) return false;
 
@@ -243,10 +240,10 @@ public class GameStatus {
                 return true;
             }
 
-            movePlace((Player) c);
-                // update the server with the new position
+            // update the server with the new position
             String msg = "move " + c.getID() + " " + c.getX() + " " + c.getY();
             new ClientConnectorTask().execute(msg);
+            movePlace((Player) c);
 
             return true;
         }
@@ -289,9 +286,8 @@ public class GameStatus {
      */
     public void register(String name, Main main) {
         this.main = main;
-        String msg = "";
         String ipAddress = NetworkUtils.getIPAddress();
-        msg = "register " + name + " " + ipAddress;
+        String msg = "register " + name + " " + ipAddress;
         new ClientConnectorTask().execute(msg);
     }
 
@@ -319,6 +315,7 @@ public class GameStatus {
         Player player = new Player(id, name, xpos, ypos, this, main);
         t[xpos][ypos] = Types.PERSON;
         p.put(id, player);
+        Main.game.signalRedraw();
     }
 
     public void moveAnotherSmelly(Integer id, String direction) {
@@ -356,6 +353,10 @@ public class GameStatus {
         t[oldx][oldy] = Types.NULL;
         t[xpos][ypos] = Types.ROBOT;
         Main.game.signalRedraw();
+    }
+
+    public void dumpBanana(Integer xpos, Integer ypos) {
+        t[xpos][ypos] = Types.PERSONANDBOMB;
     }
 
     class BlowBombTimerTask extends TimerTask {

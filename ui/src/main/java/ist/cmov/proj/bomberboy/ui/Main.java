@@ -51,6 +51,7 @@ public class Main extends Activity {
         alert.setTitle(title);
         alert.setCancelable(false);
 
+        AlertDialog dialog;
         // Set an EditText view to get user input
         final EditText input = new EditText(this);
         alert.setView(input);
@@ -69,11 +70,12 @@ public class Main extends Activity {
                     }
                     setPoints(me.getScore().toString());
                     g.beginGame();
+                    dialog.dismiss();
                 }
             }
         });
-
-        alert.show();
+        dialog = alert.create();
+        dialog.show();
     }
 
     public void setGameStatus(GameStatus g) {
