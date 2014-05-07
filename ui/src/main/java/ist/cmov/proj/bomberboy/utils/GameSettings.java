@@ -16,14 +16,14 @@ public class GameSettings {
     private Integer explosionTimeout;
     private Integer explosionDuration;
     private Integer explosionRange;
-    private Double robotSpeed;
+    private Integer robotSpeed;
     private Integer pointsPerRobot;
     private Integer pointsPerPlayer;
     private Types[][] map;
     private ArrayList<Robot> robots;
     private Stack<Player> players;
 
-    public GameSettings(String levelName, Integer gameDuration, Integer explosionTimeout, Integer explosionDuration, Integer explosionRange, Double robotSpeed, Integer pointsPerRobot, Integer pointsPerPlayer, Types[][] map, ArrayList<Robot> robots, Stack<Player> players) {
+    public GameSettings(String levelName, Integer gameDuration, Integer explosionTimeout, Integer explosionDuration, Integer explosionRange, Integer robotSpeed, Integer pointsPerRobot, Integer pointsPerPlayer, Types[][] map, ArrayList<Robot> robots, Stack<Player> players) {
         this.levelName = levelName;
         this.gameDuration = gameDuration;
         this.explosionTimeout = explosionTimeout;
@@ -77,11 +77,11 @@ public class GameSettings {
         this.explosionRange = explosionRange;
     }
 
-    public Double getRobotSpeed() {
+    public Integer getRobotSpeed() {
         return robotSpeed;
     }
 
-    public void setRobotSpeed(Double robotSpeed) {
+    public void setRobotSpeed(Integer robotSpeed) {
         this.robotSpeed = robotSpeed;
     }
 

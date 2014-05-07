@@ -43,6 +43,10 @@ public class GameStatus {
         return p.values();
     }
 
+    public void removePlayer(Player pl) {
+        p.remove(pl.getID());
+    }
+
     public GameStatus() {
         p = new HashMap<Integer, Player>();
         r = new HashMap<Integer, Robot>();
@@ -50,8 +54,8 @@ public class GameStatus {
 
     public void initializeSettings() {
         RANGE = SettingsReader.getSettings().getExplosionRange();
-        TIMETOBLOW = SettingsReader.getSettings().getExplosionTimeout() * 1000;
-        TIMEOFBLOW = SettingsReader.getSettings().getExplosionDuration() * 1000;
+        TIMETOBLOW = SettingsReader.getSettings().getExplosionTimeout();
+        TIMEOFBLOW = SettingsReader.getSettings().getExplosionDuration();
         for (Robot robot : r.values()) {
             robot.initializeSettings();
         }
@@ -110,8 +114,8 @@ public class GameStatus {
             }
         }
 
-        t.schedule(new EndGame(), SettingsReader.getSettings().getGameDuration() * 1000);
-        thread.updateClock(SettingsReader.getSettings().getGameDuration() * 1000);
+        t.schedule(new EndGame(), SettingsReader.getSettings().getGameDuration());
+        thread.updateClock(SettingsReader.getSettings().getGameDuration());
 
         class UpdateTime extends TimerTask {
             public void run() {
@@ -278,13 +282,17 @@ public class GameStatus {
 
                 Timer t = new Timer();
                 timers.add(t);
-                t.schedule(new BlowBombTimerTask(c.getX(), c.getY(), c, t), SettingsReader.getSettings().getExplosionTimeout() * 1000);
+                t.schedule(new BlowBombTimerTask(c.getX(), c.getY(), c, t), SettingsReader.getSettings().getExplosionTimeout());
 
                 return true;
             } else {
                 return false;
             }
         }
+    }
+
+    public void killSmelly() {
+        thread.smellyDied();
     }
 
     class BlowBombTimerTask extends TimerTask {
@@ -305,7 +313,7 @@ public class GameStatus {
                 t[x][y] = Types.EXPLOSION;
                 controllable.toggleBomb();
                 if (cleanTab(x, y)) {
-                    thread.smellyDied();
+                    killSmelly();
                     cancelTimers();
                     GAMEOVER = true;
                 }
@@ -317,7 +325,7 @@ public class GameStatus {
             if (!GAMEOVER) {
                 Timer t = new Timer();
                 timers.add(t);
-                t.schedule(new CleanBombTimerTask(x, y, t), SettingsReader.getSettings().getExplosionDuration() * 1000);
+                t.schedule(new CleanBombTimerTask(x, y, t), SettingsReader.getSettings().getExplosionDuration());
             }
         }
 
