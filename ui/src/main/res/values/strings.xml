@@ -4,5 +4,12 @@
     <string name="app_name">BomberBoy</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="title_activity_bomber_boy_launcher">Launcher</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="ipPeer">IP of the peer to connect</string>
+    <string name="connectButton">Connect</string>
+    <string name="disconnectButton">Disconnect</string>
+    <string name="refreshPeersButton">Refresh</string>
 
 </resources>
