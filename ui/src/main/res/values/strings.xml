@@ -13,5 +13,9 @@
     <string name="refreshPeersButton">Refresh</string>
     <string name="createGroupButton">Create Group</string>
     <string name="startGameButtton">Start Game</string>
+    <string name="p2p_off_warning">Please enable P2P in Settings</string>
+    <string name="label_me">ME</string>
+    <string name="label_peers">PEERS</string>
+    <string name="empty_message">Please enable P2P and refresh the peer list</string>
 
 </resources>

@@ -33,6 +33,8 @@ public class Launcher extends Activity {
 
     public static final String TAG = "Launcher";
     public static final int PORT = 8888;
+
+    private boolean isWifiP2pEnabled = false;
     private List peers = new ArrayList();
     private WifiP2pGroup p2pGroup;
     private WifiP2pInfo p2pInfo;
@@ -42,6 +44,13 @@ public class Launcher extends Activity {
     WifiP2pManager.Channel mChannel;
     BroadcastReceiver mReceiver;
     IntentFilter mIntentFilter;
+
+    /**
+     * @param isWifiP2pEnabled the isWifiP2pEnabled to set
+     */
+    public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {
+        this.isWifiP2pEnabled = isWifiP2pEnabled;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,15 +156,22 @@ public class Launcher extends Activity {
     private View.OnClickListener listenerRefreshButton = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+            if (!isWifiP2pEnabled) {
+                Toast.makeText(getApplicationContext(), R.string.p2p_off_warning,
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
             mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
                 @Override
                 public void onSuccess() {
-                    Log.d(Launcher.TAG, "Refresh Completed.");
+                    Toast.makeText(getApplicationContext(), "Refresh Started...", Toast.LENGTH_SHORT).show();
+                    Log.d(Launcher.TAG, "Refresh Started...");
                 }
 
                 @Override
-                public void onFailure(int i) {
-
+                public void onFailure(int errorCode) {
+                    Toast.makeText(getApplicationContext(), "Refresh failed : " + errorCode, Toast.LENGTH_SHORT).show();
+                    Log.d(Launcher.TAG, "Refresh Failed.");
                 }
             });
         }
