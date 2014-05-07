@@ -3,15 +3,26 @@ package ist.cmov.proj.bomberboy.ui;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.wifi.p2p.WifiP2pConfig;
+import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pGroup;
+import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +32,11 @@ import ist.cmov.proj.bomberboy.wifidirect.WifiDirectBroadcastReceiver;
 public class Launcher extends Activity {
 
     public static final String TAG = "Launcher";
+    public static final int PORT = 8888;
     private List peers = new ArrayList();
+    private WifiP2pGroup p2pGroup;
+    private WifiP2pInfo p2pInfo;
+    private Socket goConnection;
 
     WifiP2pManager mManager;
     WifiP2pManager.Channel mChannel;
@@ -59,6 +74,48 @@ public class Launcher extends Activity {
         @Override
         public void onClick(View view) {
             findViewById(R.id.idConnectButton).setEnabled(false);
+            mManager.requestGroupInfo(mChannel, new WifiP2pManager.GroupInfoListener() {
+                @Override
+                public void onGroupInfoAvailable(WifiP2pGroup wifiP2pGroup) {
+                    p2pGroup = wifiP2pGroup;
+                }
+            });
+            if (p2pGroup == null) {
+                Toast.makeText(getApplicationContext(), "Failed to get Group!", Toast.LENGTH_SHORT).show();
+                findViewById(R.id.idConnectButton).setEnabled(true);
+                return;
+            }
+            WifiP2pDevice go = p2pGroup.getOwner();
+            WifiP2pConfig config = new WifiP2pConfig();
+            config.deviceAddress = go.deviceAddress;
+            mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
+                @Override
+                public void onSuccess() {
+                    String result = "Connected to the group owner";
+                    Toast.makeText(getApplicationContext(), result, Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFailure(int i) {
+                    Toast.makeText(getApplicationContext(), "Failed!", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            mManager.requestConnectionInfo(mChannel, new WifiP2pManager.ConnectionInfoListener() {
+                @Override
+                public void onConnectionInfoAvailable(WifiP2pInfo wifiP2pInfo) {
+                    p2pInfo = wifiP2pInfo;
+                }
+            });
+
+            InetAddress inet = p2pInfo.groupOwnerAddress;
+            goConnection = new Socket();
+            try {
+                goConnection.bind(null);
+                goConnection.connect(new InetSocketAddress(inet, PORT));
+            } catch (IOException e) {
+                Log.d(TAG, e.toString());
+            }
         }
     };
 
@@ -66,6 +123,24 @@ public class Launcher extends Activity {
         @Override
         public void onClick(View view) {
             findViewById(R.id.idDisconnectButton).setEnabled(false);
+        }
+    };
+
+    private View.OnClickListener listenerCreateGroupButton = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            findViewById(R.id.idCreateGroup).setEnabled(false);
+            mManager.createGroup(mChannel, new WifiP2pManager.ActionListener() {
+                @Override
+                public void onSuccess() {
+
+                }
+
+                @Override
+                public void onFailure(int i) {
+
+                }
+            });
         }
     };
 
@@ -90,6 +165,7 @@ public class Launcher extends Activity {
         findViewById(R.id.idConnectButton).setOnClickListener(listenerConnectButton);
         findViewById(R.id.idDisconnectButton).setOnClickListener(listenerDisconnectButton);
         findViewById(R.id.idRefreshPeersButton).setOnClickListener(listenerRefreshButton);
+        findViewById(R.id.idCreateGroup).setOnClickListener(listenerCreateGroupButton);
     }
 
     /* register the broadcast receiver with the intent values to be matched */

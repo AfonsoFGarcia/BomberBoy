@@ -25,16 +25,13 @@
             android:theme="@android:style/Theme.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name="ist.cmov.proj.bomberboy.ui.BomberBoyLauncher"
+            android:name="ist.cmov.proj.bomberboy.ui.Launcher"
             android:label="@string/title_activity_bomber_boy_launcher">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

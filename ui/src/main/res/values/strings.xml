@@ -11,5 +11,7 @@
     <string name="connectButton">Connect</string>
     <string name="disconnectButton">Disconnect</string>
     <string name="refreshPeersButton">Refresh</string>
+    <string name="createGroupButton">Create Group</string>
+    <string name="startGameButtton">Start Game</string>
 
 </resources>
