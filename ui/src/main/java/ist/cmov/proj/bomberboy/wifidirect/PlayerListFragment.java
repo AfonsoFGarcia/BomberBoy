@@ -4,6 +4,7 @@ import android.app.ListFragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
@@ -26,9 +27,7 @@ import ist.cmov.proj.bomberboy.ui.R;
 /**
  * Created by duarte on 07-05-2014.
  */
-public class PlayerListFragment extends ListFragment implements WifiP2pManager.PeerListListener
-
-{
+public class PlayerListFragment extends ListFragment implements WifiP2pManager.PeerListListener {
 
     private List<WifiP2pDevice> peers = new ArrayList<WifiP2pDevice>();
     ProgressDialog progressDialog = null;
@@ -80,7 +79,16 @@ public class PlayerListFragment extends ListFragment implements WifiP2pManager.P
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         WifiP2pDevice device = (WifiP2pDevice) getListAdapter().getItem(position);
-        ((DeviceActionListener) getActivity()).showDetails(device);
+        WifiP2pConfig config = new WifiP2pConfig();
+        config.deviceAddress = device.deviceAddress;
+        config.wps.setup = WpsInfo.PBC;
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
+        progressDialog = ProgressDialog.show(getActivity(), "Press back to cancel",
+                "Connecting to :" + device.deviceAddress, true, true);
+        ((DeviceActionListener) getActivity()).connect(config);
+
     }
 
     /**
@@ -152,11 +160,14 @@ public class PlayerListFragment extends ListFragment implements WifiP2pManager.P
             Log.d(Launcher.TAG, "No devices found");
             return;
         }
-
     }
 
     public void clearPeers() {
         peers.clear();
+        ((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
+    }
+
+    public void updateDevicesStatus() {
         ((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
     }
 
@@ -167,12 +178,10 @@ public class PlayerListFragment extends ListFragment implements WifiP2pManager.P
         if (progressDialog != null && progressDialog.isShowing()) {
             progressDialog.dismiss();
         }
-        progressDialog = ProgressDialog.show(getActivity(), "Press back to cancel", "finding peers", true,
+        progressDialog = ProgressDialog.show(getActivity(), "Press back to cancel", "finding players", true,
                 true, new DialogInterface.OnCancelListener() {
-
                     @Override
                     public void onCancel(DialogInterface dialog) {
-
                     }
                 }
         );
@@ -184,13 +193,7 @@ public class PlayerListFragment extends ListFragment implements WifiP2pManager.P
      */
     public interface DeviceActionListener {
 
-        void showDetails(WifiP2pDevice device);
-
-        void cancelDisconnect();
-
         void connect(WifiP2pConfig config);
-
-        void disconnect();
     }
 
 }

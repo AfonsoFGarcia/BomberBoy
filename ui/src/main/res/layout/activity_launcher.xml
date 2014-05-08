@@ -43,18 +43,26 @@
             android:layout_height="wrap_content">
 
             <Button
-                android:id="@+id/idCreateGroup"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/createGroupButton" />
-
-            <Button
                 android:id="@+id/idStartGameButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/startGameButtton" />
 
         </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <fragment
+                class="ist.cmov.proj.bomberboy.wifidirect.PlayerListFragment"
+                android:id="@+id/player_list_frag"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/phone_list_height"></fragment>
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <EditText

@@ -22,14 +22,13 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
-import ist.cmov.proj.bomberboy.wifidirect.WifiDirectBroadcastReceiver;
+import ist.cmov.proj.bomberboy.wifidirect.*;
 
 
-public class Launcher extends Activity {
+public class Launcher extends Activity implements PlayerListFragment.DeviceActionListener, WifiP2pManager.ConnectionInfoListener {
 
     public static final String TAG = "Launcher";
     public static final int PORT = 8888;
@@ -135,24 +134,6 @@ public class Launcher extends Activity {
         }
     };
 
-    private View.OnClickListener listenerCreateGroupButton = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            findViewById(R.id.idCreateGroup).setEnabled(false);
-            mManager.createGroup(mChannel, new WifiP2pManager.ActionListener() {
-                @Override
-                public void onSuccess() {
-
-                }
-
-                @Override
-                public void onFailure(int i) {
-
-                }
-            });
-        }
-    };
-
     private View.OnClickListener listenerRefreshButton = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -161,6 +142,9 @@ public class Launcher extends Activity {
                         Toast.LENGTH_SHORT).show();
                 return;
             }
+            final PlayerListFragment fragment = (PlayerListFragment) getFragmentManager()
+                    .findFragmentById(R.id.player_list_frag);
+            fragment.onInitiateDiscovery();
             mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
                 @Override
                 public void onSuccess() {
@@ -170,18 +154,63 @@ public class Launcher extends Activity {
 
                 @Override
                 public void onFailure(int errorCode) {
-                    Toast.makeText(getApplicationContext(), "Refresh failed : " + errorCode, Toast.LENGTH_SHORT).show();
-                    Log.d(Launcher.TAG, "Refresh Failed.");
+                    Toast.makeText(getApplicationContext(), "Refresh failed. Please try again.", Toast.LENGTH_SHORT).show();
+                    Log.d(Launcher.TAG, "Refresh Failed because of : " + errorCode);
                 }
             });
         }
     };
 
+
     private void guiSetButtonListeners() {
         findViewById(R.id.idConnectButton).setOnClickListener(listenerConnectButton);
         findViewById(R.id.idDisconnectButton).setOnClickListener(listenerDisconnectButton);
         findViewById(R.id.idRefreshPeersButton).setOnClickListener(listenerRefreshButton);
-        findViewById(R.id.idCreateGroup).setOnClickListener(listenerCreateGroupButton);
+    }
+
+    @Override
+    public void onConnectionInfoAvailable(final WifiP2pInfo info) {
+        // InetAddress from WifiP2pInfo structure.
+        InetAddress groupOwnerAddress = info.groupOwnerAddress;
+
+        // After the group negotiation, we can determine the group owner.
+        if (info.groupFormed && info.isGroupOwner) {
+            // Do whatever tasks are specific to the group owner.
+            // One common case is creating a server thread and accepting
+            // incoming connections.
+            Toast.makeText(getApplicationContext(), "I'm the group owner!", Toast.LENGTH_SHORT).show();
+        } else if (info.groupFormed) {
+            // The other device acts as the client. In this case,
+            // you'll want to create a client thread that connects to the group
+            // owner.
+            Toast.makeText(getApplicationContext(), "I'm just a peer", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    @Override
+    public void connect(WifiP2pConfig config) {
+        mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(getApplicationContext(), "Success.",
+                        Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(int i) {
+                Toast.makeText(getApplicationContext(), "Connect failed. Retry.",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void resetData() {
+        PlayerListFragment fragmentList = (PlayerListFragment) getFragmentManager()
+                .findFragmentById(R.id.player_list_frag);
+        if (fragmentList != null) {
+            fragmentList.clearPeers();
+        }
     }
 
     /* register the broadcast receiver with the intent values to be matched */
