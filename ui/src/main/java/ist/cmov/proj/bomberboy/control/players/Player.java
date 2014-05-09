@@ -14,6 +14,7 @@ public class Player implements Controllable {
     public Boolean bomb;
     public Boolean dead;
     private String name;
+    private String url;
     private GameStatus status;
     private Integer id;
     private Integer points;
@@ -30,9 +31,11 @@ public class Player implements Controllable {
         this.dead = false;
         this.points = 0;
     }
-    public Player(Integer x, Integer y, GameStatus status, Main mainActivity) {
+
+    public Player(Integer x, Integer y, Integer id, GameStatus status, Main mainActivity) {
         this.x = x;
         this.y = y;
+        this.id = id;
         this.bomb = false;
         this.dead = false;
         this.status = status;
@@ -55,16 +58,28 @@ public class Player implements Controllable {
     }
 
     public Player(Player other, GameStatus status) {
-        this(other.x, other.y, status, other.mainActivity);
+        this(other.x, other.y, other.id, status, other.mainActivity);
     }
 
     public void setID(Integer id) {
         this.id = id;
     }
 
-    public String getName() { return this.name; }
+    public String getName() {
+        return this.name;
+    }
 
-    public void setName(String s) { this.name = s; }
+    public void setName(String s) {
+        this.name = s;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getUrl() {
+        return url;
+    }
 
     public int getID() {
         return id;

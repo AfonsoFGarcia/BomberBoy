@@ -1,0 +1,115 @@
+package ist.cmov.proj.bomberboy.wifidirect;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Stack;
+
+import ist.cmov.proj.bomberboy.control.players.Player;
+import ist.cmov.proj.bomberboy.control.robots.Robot;
+import ist.cmov.proj.bomberboy.status.GameStatus;
+import ist.cmov.proj.bomberboy.wifidirect.connector.ServerConnectorTask;
+
+/**
+ * Created by duarte on 09-05-2014.
+ */
+public class Server {
+
+    private Stack<Player> playerStack;
+    private HashMap<Integer, Player> players = new HashMap<Integer, Player>();
+    private HashMap<Integer, String> playersURL = new HashMap<Integer, String>();
+    private HashMap<Integer, Robot> robots = new HashMap<Integer, Robot>();
+    private GameStatus status;
+
+    public Server(Stack<Player> stack, GameStatus status) {
+        this.playerStack = stack;
+        this.status = status;
+    }
+
+    public void smellMove(Integer id, Integer xpos, Integer ypos) {
+        Player p = players.get(id);
+        int oldx = p.getX();
+        int oldy = p.getY();
+
+        String dir = "still"; // in case the smelly moves against a wall
+        if (oldx < xpos) {
+            dir = "down";
+            p.incrX();
+        }
+        if (oldx > xpos) {
+            dir = "up";
+            p.decrX();
+        }
+        if (oldy < ypos) {
+            dir = "right";
+            p.incrY();
+        }
+        if (oldy > ypos) {
+            dir = "left";
+            p.decrY();
+        }
+
+        String name = p.getName();
+        // placeholder debug message
+        System.err.println("Smelly " + name + " moved to " + xpos + ", " + ypos + "\ndirection " + dir);
+
+        status.moveAnotherSmelly(id, dir);
+
+        // comunicate changes to other players
+        Collection<Player> playerColl = players.values();
+        for (Player o : playerColl) {
+            if (o.getID() == p.getID() || o.getID() == status.getMe().getID())
+                continue;
+
+            String msg = "move " + id + " " + dir;
+            ServerConnectorTask broadcast = new ServerConnectorTask();
+            broadcast.execute(msg, o.getUrl());
+        }
+    }
+
+    public void bananaDump(Integer id, Integer xpos, Integer ypos) {
+
+    }
+
+    public boolean addPlayer(String name, String url) {
+        if (!playerStack.empty()) {
+            Player p = playerStack.pop();
+            int id = p.getID();
+            p.setUrl(url);
+            p.setName(name);
+            playersURL.put(id, url);
+
+            // placeholder message for the server
+            System.err.println("Player " + name + " joined a new game, with ID: " + id + "\nand url " + url);
+
+            if (!GameStatus.SERVER_MODE) {
+                // inform the player (ack register) we added him with pair (id, pos)
+                String msg = "ackReg " + id + " " + p.getX() + " " + p.getY();
+                ServerConnectorTask inform = new ServerConnectorTask();
+                inform.execute(msg, url);
+            } else {
+                status.ackReg(id, p.getX(), p.getY());
+            }
+
+            if (players.size() > 1) {
+                // TODO: Try to use a BroadcastConnectorTask
+                Collection<Player> playerColl = players.values();
+                for (Player c : playerColl) {
+                    String player = "newplayer " + c.getID() + " " + c.getX() + " " + c.getY() + " " + c.getName();
+                    ServerConnectorTask update = new ServerConnectorTask();
+                    update.execute(player, url);
+                }
+                // if there are other players in game, let's inform them
+                for (Player o : playerColl) {
+                    String other = "newplayer " + id + " " + p.getX() + " " + p.getY() + " " + name;
+                    ServerConnectorTask others = new ServerConnectorTask();
+                    others.execute(other, o.getUrl());
+                }
+            }
+            players.put(id, p);
+            status.updatePlayers(players);
+            return true;
+        }
+
+        return false;
+    }
+}

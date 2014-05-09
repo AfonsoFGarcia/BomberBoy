@@ -21,10 +21,11 @@ public class Robot extends Thread implements Controllable {
     private Boolean bomb;
     private Integer id;
 
-    public Robot(GameStatus status, Integer x, Integer y) {
+    public Robot(GameStatus status, Integer x, Integer y, Integer id) {
         this.status = status;
         this.x = x;
         this.y = y;
+        this.id = id;
         this.dead = false;
         this.bomb = false;
     }

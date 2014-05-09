@@ -25,19 +25,16 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+import ist.cmov.proj.bomberboy.status.GameStatus;
 import ist.cmov.proj.bomberboy.wifidirect.*;
 
 
 public class Launcher extends Activity implements PlayerListFragment.DeviceActionListener, WifiP2pManager.ConnectionInfoListener {
 
     public static final String TAG = "Launcher";
-    public static final int PORT = 8888;
 
     private boolean isWifiP2pEnabled = false;
-    private List peers = new ArrayList();
-    private WifiP2pGroup p2pGroup;
-    private WifiP2pInfo p2pInfo;
-    private Socket goConnection;
+
 
     WifiP2pManager mManager;
     WifiP2pManager.Channel mChannel;
@@ -70,60 +67,11 @@ public class Launcher extends Activity implements PlayerListFragment.DeviceActio
 
     }
 
-    public WifiP2pManager.PeerListListener peerListener = new WifiP2pManager.PeerListListener() {
-        @Override
-        public void onPeersAvailable(WifiP2pDeviceList deviceList) {
-            peers.clear();
-            peers.addAll(deviceList.getDeviceList());
-        }
-    };
-
-    private View.OnClickListener listenerConnectButton = new View.OnClickListener() {
+    private View.OnClickListener listenerStartGameButton = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            findViewById(R.id.idConnectButton).setEnabled(false);
-            mManager.requestGroupInfo(mChannel, new WifiP2pManager.GroupInfoListener() {
-                @Override
-                public void onGroupInfoAvailable(WifiP2pGroup wifiP2pGroup) {
-                    p2pGroup = wifiP2pGroup;
-                }
-            });
-            if (p2pGroup == null) {
-                Toast.makeText(getApplicationContext(), "Failed to get Group!", Toast.LENGTH_SHORT).show();
-                findViewById(R.id.idConnectButton).setEnabled(true);
-                return;
-            }
-            WifiP2pDevice go = p2pGroup.getOwner();
-            WifiP2pConfig config = new WifiP2pConfig();
-            config.deviceAddress = go.deviceAddress;
-            mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
-                @Override
-                public void onSuccess() {
-                    String result = "Connected to the group owner";
-                    Toast.makeText(getApplicationContext(), result, Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void onFailure(int i) {
-                    Toast.makeText(getApplicationContext(), "Failed!", Toast.LENGTH_SHORT).show();
-                }
-            });
-
-            mManager.requestConnectionInfo(mChannel, new WifiP2pManager.ConnectionInfoListener() {
-                @Override
-                public void onConnectionInfoAvailable(WifiP2pInfo wifiP2pInfo) {
-                    p2pInfo = wifiP2pInfo;
-                }
-            });
-
-            InetAddress inet = p2pInfo.groupOwnerAddress;
-            goConnection = new Socket();
-            try {
-                goConnection.bind(null);
-                goConnection.connect(new InetSocketAddress(inet, PORT));
-            } catch (IOException e) {
-                Log.d(TAG, e.toString());
-            }
+            Intent i = new Intent(getApplicationContext(), Main.class);
+            startActivity(i);
         }
     };
 
@@ -163,9 +111,9 @@ public class Launcher extends Activity implements PlayerListFragment.DeviceActio
 
 
     private void guiSetButtonListeners() {
-        findViewById(R.id.idConnectButton).setOnClickListener(listenerConnectButton);
         findViewById(R.id.idDisconnectButton).setOnClickListener(listenerDisconnectButton);
         findViewById(R.id.idRefreshPeersButton).setOnClickListener(listenerRefreshButton);
+        findViewById(R.id.idStartGameButton).setOnClickListener(listenerStartGameButton);
     }
 
     @Override
@@ -178,11 +126,15 @@ public class Launcher extends Activity implements PlayerListFragment.DeviceActio
             // Do whatever tasks are specific to the group owner.
             // One common case is creating a server thread and accepting
             // incoming connections.
+            GameStatus.SERVER_MODE = true;
+            GameStatus.info = info;
             Toast.makeText(getApplicationContext(), "I'm the group owner!", Toast.LENGTH_SHORT).show();
         } else if (info.groupFormed) {
             // The other device acts as the client. In this case,
             // you'll want to create a client thread that connects to the group
             // owner.
+            GameStatus.SERVER_MODE = false;
+            GameStatus.info = info;
             Toast.makeText(getApplicationContext(), "I'm just a peer", Toast.LENGTH_SHORT).show();
         }
 

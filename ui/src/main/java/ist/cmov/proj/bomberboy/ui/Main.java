@@ -3,6 +3,7 @@ package ist.cmov.proj.bomberboy.ui;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,8 @@ import ist.cmov.proj.bomberboy.status.GameStatus;
 import ist.cmov.proj.bomberboy.status.Movements;
 import ist.cmov.proj.bomberboy.utils.NoSuchTypeException;
 import ist.cmov.proj.bomberboy.utils.SettingsReader;
+import ist.cmov.proj.bomberboy.wifidirect.service.ClientService;
+import ist.cmov.proj.bomberboy.wifidirect.service.ServerService;
 
 public class Main extends Activity {
 
@@ -193,6 +196,13 @@ public class Main extends Activity {
             }
         });
 
+        if (GameStatus.SERVER_MODE) {
+            Intent i = new Intent(getApplicationContext(), ServerService.class);
+            startService(i);
+        } else {
+            Intent i = new Intent(getApplicationContext(), ClientService.class);
+            startService(i);
+        }
         getPlayer();
 
     }

@@ -1,9 +1,12 @@
 package ist.cmov.proj.bomberboy.status;
 
+import android.net.wifi.p2p.WifiP2pInfo;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -16,11 +19,14 @@ import ist.cmov.proj.bomberboy.ui.Main;
 import ist.cmov.proj.bomberboy.utils.GameSettings;
 import ist.cmov.proj.bomberboy.utils.SettingsReader;
 import ist.cmov.proj.bomberboy.server.*;
+import ist.cmov.proj.bomberboy.wifidirect.Server;
 
 public class GameStatus {
 
     public static int SIZE = 19;
     public static boolean GAMESTARTED = false;
+    public static boolean SERVER_MODE = true; // by default so the player can play alone
+    public static WifiP2pInfo info;
     protected static boolean GAMEOVER = false;
     protected static int RANGE;
     protected static int TIMETOBLOW;
@@ -28,6 +34,7 @@ public class GameStatus {
     protected static ArrayList<Timer> timers = new ArrayList<Timer>();
 
     protected Object lock = new Object();
+    private Server server;
     private Main main;
     private Player me;
     private Types[][] t;
@@ -44,8 +51,23 @@ public class GameStatus {
         return t;
     }
 
+    public Server getServerObject() {
+        if (SERVER_MODE)
+            return server;
+
+        return null;
+    }
+
+    public void updatePlayers(HashMap<Integer, Player> players) {
+        p = players;
+    }
+
     public Collection<Player> getPlayers() {
         return p.values();
+    }
+
+    public Player getMe() {
+        return me;
     }
 
     public GameStatus() {
@@ -99,7 +121,7 @@ public class GameStatus {
     public void beginGame() {
         HashMap<Integer, Robot> rNews = new HashMap<Integer, Robot>();
         for (Robot r : this.r.values()) {
-            Robot rNew = new Robot(this, r.getX(), r.getY());
+            Robot rNew = new Robot(this, r.getX(), r.getY(), r.getID());
             rNew.setID(r.getID());
             rNews.put(r.getID(), rNew);
         }
@@ -144,7 +166,7 @@ public class GameStatus {
         for (Robot robot : settings.getRobots()) {
             registerRobot(robot);
         }
-        playerStack = (Stack<Player>) settings.getPlayers().clone();
+        server = new Server((Stack<Player>) settings.getPlayers().clone(), this);
         GAMEOVER = false;
     }
 
@@ -240,11 +262,12 @@ public class GameStatus {
                 return true;
             }
 
-            // update the server with the new position
-            String msg = "move " + c.getID() + " " + c.getX() + " " + c.getY();
-            new ClientConnectorTask().execute(msg);
+            if (!SERVER_MODE) {
+                // update the server with the new position
+                String msg = "move " + c.getID() + " " + c.getX() + " " + c.getY();
+                new ClientConnectorTask().execute(msg);
+            }
             movePlace((Player) c);
-
             return true;
         }
     }
@@ -286,9 +309,18 @@ public class GameStatus {
      */
     public void register(String name, Main main) {
         this.main = main;
-        String ipAddress = NetworkUtils.getIPAddress();
-        String msg = "register " + name + " " + ipAddress;
-        new ClientConnectorTask().execute(msg);
+        if (SERVER_MODE) {
+            // dirty hack to prevent using WifiP2pInfo
+            if (info == null) {
+                server.addPlayer(name, NetworkUtils.getIPAddress());
+            } else {
+                server.addPlayer(name, info.groupOwnerAddress.getHostAddress());
+            }
+        } else {
+            String ipAddress = NetworkUtils.getIPAddress();
+            String msg = "register " + name + " " + ipAddress;
+            new ClientConnectorTask().execute(msg);
+        }
     }
 
     public void ackReg(Integer id, int xpos, int ypos) {

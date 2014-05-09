@@ -17,6 +17,9 @@ public class SettingsReader {
     private static ArrayList<Robot> robots;
     private static Stack<Player> players;
     private static GameSettings settings;
+    private static int nextplayerid;
+    private static int nextrobotid;
+
 
     public static GameSettings getSettings() {
         return settings;
@@ -26,7 +29,8 @@ public class SettingsReader {
 
         robots = new ArrayList<Robot>();
         players = new Stack<Player>();
-
+        nextplayerid = 1;
+        nextrobotid = 1;
         ArrayList<String> mapStrings = new ArrayList<String>();
         try {
             String s = reader.readLine();
@@ -68,10 +72,10 @@ public class SettingsReader {
                 typeMap[y] = Types.BARRIER;
             } else if (p == 'R') {
                 typeMap[y] = Types.ROBOT;
-                robots.add(new Robot(s, x, y));
+                robots.add(new Robot(s, x, y, nextrobotid++));
             } else if (p == 'P') {
                 typeMap[y] = Types.NULL;
-                players.push(new Player(x, y, s, main));
+                players.push(new Player(x, y, nextplayerid++, s, main));
             } else {
                 throw new NoSuchTypeException(p);
             }
