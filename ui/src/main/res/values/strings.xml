@@ -18,5 +18,6 @@
     <string name="label_peers">PEERS</string>
     <string name="empty_message">Please enable P2P and refresh the peer list</string>
     <string name="clientServiceName">ClientService</string>
+    <string name="serverServiceName">Server</string>
 
 </resources>

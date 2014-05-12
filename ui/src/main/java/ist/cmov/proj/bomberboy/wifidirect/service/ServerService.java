@@ -24,7 +24,7 @@ public class ServerService extends Service {
 
     public static final String TAG = "SERVERSERVICE";
     public static final String EXTRAS_GROUP_OWNER_ADDRESS = "go_address";
-    public static final int GROUP_OWNER_PORT = 8100;
+    public static final int GROUP_OWNER_PORT = 8988;
     private ist.cmov.proj.bomberboy.wifidirect.Server server;
 
     @Override
@@ -126,7 +126,7 @@ public class ServerService extends Service {
 
         ServerThread() {
             try {
-                serverSocket = new ServerSocket(8100);
+                serverSocket = new ServerSocket(GROUP_OWNER_PORT);
             } catch (IOException e) {
                 Log.e(TAG, "Cannot open server socket : ", e);
             }
@@ -135,10 +135,12 @@ public class ServerService extends Service {
         @Override
         public void run() {
             while (GameStatus.SERVER_MODE) {
+                Socket socket;
+                InputStreamReader streamReader;
                 try {
-                    Socket clientSocket = serverSocket.accept();
-                    InputStreamReader streamReader =
-                            new InputStreamReader(clientSocket.getInputStream());
+                    socket = serverSocket.accept();
+                    streamReader =
+                            new InputStreamReader(socket.getInputStream());
                     BufferedReader bufferedReader =
                             new BufferedReader(streamReader);
                     String msg = bufferedReader.readLine();
@@ -148,8 +150,7 @@ public class ServerService extends Service {
                         msg = "";
                     }
                     streamReader.close();
-                    clientSocket.close();
-
+                    socket.close();
                 } catch (IOException e) {
                     Log.e(TAG, "Problem in message reading : ", e);
                 }

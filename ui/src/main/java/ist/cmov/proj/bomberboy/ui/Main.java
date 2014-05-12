@@ -10,13 +10,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 import ist.cmov.proj.bomberboy.control.players.Player;
-import ist.cmov.proj.bomberboy.server.IncomingRequest;
 import ist.cmov.proj.bomberboy.status.GameStatus;
 import ist.cmov.proj.bomberboy.status.Movements;
 import ist.cmov.proj.bomberboy.utils.NoSuchTypeException;
@@ -26,13 +24,12 @@ import ist.cmov.proj.bomberboy.wifidirect.service.ServerService;
 
 public class Main extends Activity {
 
+    public static final String TAG = "Main";
     public static BomberView game;
     protected boolean scalingComplete = false;
     protected String playerName = null;
     public static GameStatus g;
-    IncomingRequest socketWrapper;
     protected Player me = null;
-    private int _port = 4444;
 
     private void getName() {
         getName("Enter your name");
@@ -139,9 +136,6 @@ public class Main extends Activity {
 
         g.initializeSettings();
 
-        socketWrapper = new IncomingRequest(_port);
-        socketWrapper.start();
-
         game.startThread(getApplicationContext(), GameStatus.SIZE, g, this);
 
         final Button button_a = (Button) findViewById(R.id.button_a);
@@ -198,10 +192,10 @@ public class Main extends Activity {
 
         if (GameStatus.SERVER_MODE) {
             Intent i = new Intent(getApplicationContext(), ServerService.class);
-            startService(i);
+            getApplication().startService(i);
         } else {
             Intent i = new Intent(getApplicationContext(), ClientService.class);
-            startService(i);
+            getApplication().startService(i);
         }
         getPlayer();
 

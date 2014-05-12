@@ -23,7 +23,7 @@ public class ClientService extends Service {
 
     public static final String TAG = "SERVERSERVICE";
     public static final String EXTRAS_GROUP_OWNER_ADDRESS = "go_address";
-    public static final int PEER_PORT = 8101;
+    public static final int PEER_PORT = 8989;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startID) {
@@ -117,7 +117,7 @@ public class ClientService extends Service {
 
         Client() {
             try {
-                clientSocket = new ServerSocket(8101);
+                clientSocket = new ServerSocket(PEER_PORT);
             } catch (IOException e) {
                 Log.e(TAG, "Cannot open client socket : ", e);
             }

@@ -93,6 +93,7 @@ public class Server {
             if (players.size() > 1) {
                 // TODO: Try to use a BroadcastConnectorTask
                 Collection<Player> playerColl = players.values();
+                // inform the player about the other players in game
                 for (Player c : playerColl) {
                     String player = "newplayer " + c.getID() + " " + c.getX() + " " + c.getY() + " " + c.getName();
                     ServerConnectorTask update = new ServerConnectorTask();

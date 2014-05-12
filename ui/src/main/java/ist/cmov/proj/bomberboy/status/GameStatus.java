@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -18,7 +17,8 @@ import ist.cmov.proj.bomberboy.ui.BomberView;
 import ist.cmov.proj.bomberboy.ui.Main;
 import ist.cmov.proj.bomberboy.utils.GameSettings;
 import ist.cmov.proj.bomberboy.utils.SettingsReader;
-import ist.cmov.proj.bomberboy.server.*;
+import ist.cmov.proj.bomberboy.utils.NetworkUtils;
+import ist.cmov.proj.bomberboy.wifidirect.connector.ClientConnectorTask;
 import ist.cmov.proj.bomberboy.wifidirect.Server;
 
 public class GameStatus {
@@ -319,7 +319,8 @@ public class GameStatus {
         } else {
             String ipAddress = NetworkUtils.getIPAddress();
             String msg = "register " + name + " " + ipAddress;
-            new ClientConnectorTask().execute(msg);
+            String host = info.groupOwnerAddress.getHostAddress();
+            new ClientConnectorTask().execute(msg, host);
         }
     }
 
