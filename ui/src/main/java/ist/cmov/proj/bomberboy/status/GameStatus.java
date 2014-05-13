@@ -247,17 +247,21 @@ public class GameStatus {
             c = me;
 
             if (!canMove(e, c)) return false;
-
+            String dir = "still";
             moveClean((Player) c);
 
             if (e.equals(Movements.DOWN)) {
                 c.incrX();
+                dir = "down";
             } else if (e.equals(Movements.UP)) {
                 c.decrX();
+                dir = "up";
             } else if (e.equals(Movements.LEFT)) {
                 c.decrY();
+                dir = "left";
             } else {
                 c.incrY();
+                dir = "right";
             }
 
             if (diedInNuclearFallout(c) && c instanceof Player) {
@@ -268,11 +272,11 @@ public class GameStatus {
 
             if (!SERVER_MODE) {
                 // update the server with the new position
-                String msg = "move " + c.getID() + " " + c.getX() + " " + c.getY();
+                String msg = "move " + c.getID() + " " + dir;
                 new ClientConnectorTask().execute(msg, host);
             } else {
                 // update all the other clients
-                server.smellMove(c.getID(), c.getX(), c.getY());
+                server.smellMove(c.getID(), dir);
             }
             movePlace((Player) c);
             return true;

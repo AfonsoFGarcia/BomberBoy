@@ -116,11 +116,10 @@ public class ServerService extends Service {
 
     private void updateTrashman(String[] params) {
         Integer id = Integer.parseInt(params[1]);
-        Integer xnew = Integer.parseInt(params[2]);
-        Integer ynew = Integer.parseInt(params[3]);
+        String dir = params[2];
 
         try {
-            server.smellMove(id, xnew, ynew);
+            server.smellMove(id, dir);
         } catch (NullPointerException npe) {
             // probably game has not been initialized
             System.err.println("NullPointerException: " + npe.getMessage());

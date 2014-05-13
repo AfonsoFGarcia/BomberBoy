@@ -30,24 +30,12 @@ public class Server {
         this.status = status;
     }
 
-    public void smellMove(Integer id, Integer xpos, Integer ypos) {
+    public void smellMove(Integer id, String dir) {
         Player p = players.get(id);
-        int oldx = p.getX();
-        int oldy = p.getY();
-
-        String dir = "still"; // in case the smelly moves against a wall
-        if (oldx < xpos)
-            dir = "down";
-        if (oldx > xpos)
-            dir = "up";
-        if (oldy < ypos)
-            dir = "right";
-        if (oldy > ypos)
-            dir = "left";
 
         String name = p.getName();
         // placeholder debug message
-        System.err.println("Smelly " + name + " moved to " + xpos + ", " + ypos + "\ndirection " + dir);
+        System.err.println("Smelly " + name + " moved to " + p.getX() + ", " + p.getY() + "\ndirection " + dir);
 
         if(id != status.getMe().getID())
             status.moveAnotherSmelly(id, dir);
