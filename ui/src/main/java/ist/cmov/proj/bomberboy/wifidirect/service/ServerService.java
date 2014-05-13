@@ -1,8 +1,12 @@
 package ist.cmov.proj.bomberboy.wifidirect.service;
 
+import android.annotation.TargetApi;
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -10,40 +14,51 @@ import android.util.Log;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 import ist.cmov.proj.bomberboy.status.GameStatus;
 import ist.cmov.proj.bomberboy.ui.Main;
-import ist.cmov.proj.bomberboy.wifidirect.Server;
+import ist.cmov.proj.bomberboy.ui.R;
 
 /**
  * Created by duarte on 08-05-2014.
  */
 public class ServerService extends Service {
 
+    private final static int id = 8020;
     public static final String TAG = "SERVERSERVICE";
-    public static final String EXTRAS_GROUP_OWNER_ADDRESS = "go_address";
     public static final int GROUP_OWNER_PORT = 8988;
     private ist.cmov.proj.bomberboy.wifidirect.Server server;
+    private ServerSocket serverSocket;
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        try {
+            serverSocket = new ServerSocket(GROUP_OWNER_PORT);
+        } catch (IOException e) {
+            Log.e(TAG, "Cannot open server socket : ", e);
+        }
+        new Thread(serverThread).start();
+        Notification notification = new Notification.Builder(this)
+                .setContentTitle("BomberBoy Server")
+                .setContentText("Running")
+                .setSmallIcon(R.drawable.robot).build();
+        startForeground(id, notification);
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startID) {
         int DEFAULT = START_STICKY;
         int FAIL = START_NOT_STICKY;
 
-        Bundle extras = intent.getExtras();
-        if (extras == null) {
-            Log.e(TAG, "Server not started because there was no information to launch it.");
-            return FAIL;
-        }
-
         if (GameStatus.SERVER_MODE) {
             // if this device is the server node
             server = Main.g.getServerObject();
-            ServerThread host = new ServerThread();
-            new Thread(host).start();
-            Log.i(TAG, "Started server service with id " + startID + " : " + intent);
+            Log.i(TAG, "Server service with id " + startID + " : " + intent);
             return DEFAULT;
         } else {
             return FAIL;
@@ -52,6 +67,12 @@ public class ServerService extends Service {
 
     @Override
     public void onDestroy() {
+        super.onDestroy();
+        try {
+            serverSocket.close();
+        } catch (IOException e) {
+            Log.e(TAG, "Could not close the server socket due to : " + e.getMessage(), e);
+        }
     }
 
 
@@ -90,7 +111,6 @@ public class ServerService extends Service {
         if (!success) {
             System.err.println("Player " + playerName + " attempted to join a full game.");
             // do something... call the trashman to make this player run away with his smell
-            return;
         }
     }
 
@@ -120,18 +140,7 @@ public class ServerService extends Service {
         }
     }
 
-    class ServerThread implements Runnable {
-
-        private ServerSocket serverSocket;
-
-        ServerThread() {
-            try {
-                serverSocket = new ServerSocket(GROUP_OWNER_PORT);
-            } catch (IOException e) {
-                Log.e(TAG, "Cannot open server socket : ", e);
-            }
-        }
-
+    private Runnable serverThread = new Runnable() {
         @Override
         public void run() {
             while (GameStatus.SERVER_MODE) {
@@ -139,11 +148,15 @@ public class ServerService extends Service {
                 InputStreamReader streamReader;
                 try {
                     socket = serverSocket.accept();
+                    InetAddress source = socket.getInetAddress();
                     streamReader =
                             new InputStreamReader(socket.getInputStream());
                     BufferedReader bufferedReader =
                             new BufferedReader(streamReader);
                     String msg = bufferedReader.readLine();
+                    StringBuilder appended = new StringBuilder(msg);
+                    appended.append(" " + source.getHostAddress());
+                    msg = appended.toString();
                     while (!msg.isEmpty()) {
                         System.out.println(msg); // placeholder for debug
                         parseMsg(msg);
@@ -156,7 +169,5 @@ public class ServerService extends Service {
                 }
             }
         }
-    }
-
-
+    };
 }

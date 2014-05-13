@@ -1,5 +1,6 @@
 package ist.cmov.proj.bomberboy.status;
 
+import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pInfo;
 
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ public class GameStatus {
     public static boolean GAMESTARTED = false;
     public static boolean SERVER_MODE = true; // by default so the player can play alone
     public static WifiP2pInfo info;
+    public static WifiP2pDevice device;
     protected static boolean GAMEOVER = false;
     protected static int RANGE;
     protected static int TIMETOBLOW;
@@ -37,6 +39,7 @@ public class GameStatus {
     private Server server;
     private Main main;
     private Player me;
+    private String host;
     private Types[][] t;
     private HashMap<Integer, Player> p;
     private HashMap<Integer, Robot> r;
@@ -262,10 +265,14 @@ public class GameStatus {
                 return true;
             }
 
+
             if (!SERVER_MODE) {
                 // update the server with the new position
                 String msg = "move " + c.getID() + " " + c.getX() + " " + c.getY();
-                new ClientConnectorTask().execute(msg);
+                new ClientConnectorTask().execute(msg, host);
+            } else {
+                // update all the other clients
+                server.smellMove(c.getID(), c.getX(), c.getY());
             }
             movePlace((Player) c);
             return true;
@@ -312,16 +319,18 @@ public class GameStatus {
         if (SERVER_MODE) {
             // dirty hack to prevent using WifiP2pInfo
             if (info == null) {
-                server.addPlayer(name, NetworkUtils.getIPAddress());
+                server.addMe(name, NetworkUtils.getIPAddress());
+                return;
             } else {
-                server.addPlayer(name, info.groupOwnerAddress.getHostAddress());
+                server.addMe(name, info.groupOwnerAddress.getHostAddress());
             }
         } else {
-            String ipAddress = NetworkUtils.getIPAddress();
-            String msg = "register " + name + " " + ipAddress;
+            String msg = "register " + name;
             String host = info.groupOwnerAddress.getHostAddress();
+            System.err.println(msg + " to " + host); // debug
             new ClientConnectorTask().execute(msg, host);
         }
+        host = info.groupOwnerAddress.getHostAddress();
     }
 
     public void ackReg(Integer id, int xpos, int ypos) {

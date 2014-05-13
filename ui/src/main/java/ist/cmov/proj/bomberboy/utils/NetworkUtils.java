@@ -4,6 +4,9 @@ import android.util.Log;
 
 import org.apache.http.conn.util.InetAddressUtils;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -18,6 +21,8 @@ import java.util.List;
 
 public class NetworkUtils {
 
+    private final static String p2pInt = "p2p-p2p0";
+
     public static String getIPAddress() {
         try {
             List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
@@ -28,18 +33,57 @@ public class NetworkUtils {
                     if (!addr.isLoopbackAddress()) {
                         String sAddr = addr.getHostAddress().toUpperCase();
                         boolean isIPv4 = InetAddressUtils.isIPv4Address(sAddr);
-                        if(!isIPv4) {
+                        if (!isIPv4) {
                             int delim = sAddr.indexOf('%');
-                            return delim<0? sAddr : sAddr.substring(0, delim);
+                            return delim < 0 ? sAddr : sAddr.substring(0, delim);
                         }
                         return sAddr;
                     }
                 }
             }
-        } catch (Exception ex) { } // for now eat exceptions
+        } catch (Exception ex) {
+        } // for now eat exceptions
         return "";
     }
 
+    /*
+    * method modified from:
+    *
+    * http://www.flattermann.net/2011/02/android-howto-find-the-hardware-mac-address-of-a-remote-host/
+    *
+    * and taken from: https://github.com/ahmontero/wifi-direct-demo/blob/master/src/com/example/android/wifidirect/Utils.java
+    *
+    * */
+    public static String getIPFromMac(String MAC) {
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new FileReader("/proc/net/arp"));
+            String line;
+            while ((line = br.readLine()) != null) {
+
+                String[] splitted = line.split(" +");
+                if (splitted != null && splitted.length >= 4) {
+                    // Basic sanity check
+                    String device = splitted[5];
+                    if (device.matches(".*" + p2pInt + ".*")) {
+                        String mac = splitted[3];
+                        if (mac.matches(MAC)) {
+                            return splitted[0];
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                br.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
 
     private byte[] getLocalIPAddress() {
         try {
@@ -74,7 +118,6 @@ public class NetworkUtils {
         }
         return ipAddrStr;
     }
-
 
 
 }

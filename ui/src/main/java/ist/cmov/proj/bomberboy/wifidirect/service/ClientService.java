@@ -1,7 +1,9 @@
 package ist.cmov.proj.bomberboy.wifidirect.service;
 
+import android.app.IntentService;
 import android.app.Service;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -22,25 +24,27 @@ import ist.cmov.proj.bomberboy.ui.Main;
 public class ClientService extends Service {
 
     public static final String TAG = "SERVERSERVICE";
-    public static final String EXTRAS_GROUP_OWNER_ADDRESS = "go_address";
     public static final int PEER_PORT = 8989;
+    private ServerSocket clientSocket;
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        try {
+            clientSocket = new ServerSocket(PEER_PORT);
+        } catch(IOException e) {
+            Log.e(TAG, "Cannot open client socket : ", e);
+        }
+        new Thread(clientThread).start();
+    }
     @Override
     public int onStartCommand(Intent intent, int flags, int startID) {
         int DEFAULT = START_STICKY;
         int FAIL = START_NOT_STICKY;
 
-        Bundle extras = intent.getExtras();
-        if (extras == null) {
-            Log.e(TAG, "Server not started because there was no information to launch it.");
-            return FAIL;
-        }
-
         if (!GameStatus.SERVER_MODE) {
-            // if this device is the server node
-            Client peer = new Client();
-            new Thread(peer).start();
-            Log.i(TAG, "Started server service with id " + startID + " : " + intent);
+            // if this device is NOT the server node
+            Log.i(TAG, "Client service with id " + startID + " : " + intent);
             return DEFAULT;
         } else {
             return FAIL;
@@ -49,6 +53,12 @@ public class ClientService extends Service {
 
     @Override
     public void onDestroy() {
+        super.onDestroy();
+        try {
+            clientSocket.close();
+        } catch (IOException e) {
+            Log.e(TAG, "Could not close the client socket due to : " + e.getMessage(), e);
+        }
     }
 
 
@@ -111,18 +121,7 @@ public class ClientService extends Service {
 
     }
 
-    class Client implements Runnable {
-
-        private ServerSocket clientSocket;
-
-        Client() {
-            try {
-                clientSocket = new ServerSocket(PEER_PORT);
-            } catch (IOException e) {
-                Log.e(TAG, "Cannot open client socket : ", e);
-            }
-        }
-
+    private Runnable clientThread = new Runnable() {
         @Override
         public void run() {
             while (!GameStatus.SERVER_MODE) {
@@ -146,7 +145,5 @@ public class ClientService extends Service {
                 }
             }
         }
-    }
-
-
+    };
 }

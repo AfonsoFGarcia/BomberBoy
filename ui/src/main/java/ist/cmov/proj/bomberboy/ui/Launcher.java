@@ -135,6 +135,9 @@ public class Launcher extends Activity implements PlayerListFragment.DeviceActio
             // owner.
             GameStatus.SERVER_MODE = false;
             GameStatus.info = info;
+            PlayerListFragment fragment = (PlayerListFragment) getFragmentManager()
+                    .findFragmentById(R.id.player_list_frag);
+            GameStatus.device = fragment.getDevice();
             Toast.makeText(getApplicationContext(), "I'm just a peer", Toast.LENGTH_SHORT).show();
         }
 

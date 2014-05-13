@@ -11,6 +11,7 @@ import java.net.UnknownHostException;
 
 import ist.cmov.proj.bomberboy.status.GameStatus;
 import ist.cmov.proj.bomberboy.ui.Main;
+import ist.cmov.proj.bomberboy.utils.NetworkUtils;
 import ist.cmov.proj.bomberboy.wifidirect.service.ClientService;
 
 /**
@@ -18,7 +19,7 @@ import ist.cmov.proj.bomberboy.wifidirect.service.ClientService;
  */
 public class ServerConnectorTask extends AsyncTask<String, Void, Integer> {
 
-    private final int SOCKET_TIMEOUT = 5000;
+    private final int SOCKET_TIMEOUT = 10000;
 
     protected Integer doInBackground(String... strings) {
         // validate input parameters
