@@ -147,4 +147,6 @@ public class Robot extends Thread implements Controllable {
     public void toggleBomb() {
         bomb = !bomb;
     }
+
+    public void interrupt() { dead = true; }
 }

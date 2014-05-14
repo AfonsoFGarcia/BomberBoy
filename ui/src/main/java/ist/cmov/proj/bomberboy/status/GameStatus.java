@@ -30,9 +30,9 @@ public class GameStatus {
     public static WifiP2pInfo info;
     public static WifiP2pDevice device;
     protected static boolean GAMEOVER = false;
-    protected static int RANGE;
-    protected static int TIMETOBLOW;
-    protected static int TIMEOFBLOW;
+    public static int RANGE;
+    public static int TIMETOBLOW;
+    public static int TIMEOFBLOW;
     protected static ArrayList<Timer> timers = new ArrayList<Timer>();
 
     protected Object lock = new Object();
@@ -222,7 +222,9 @@ public class GameStatus {
     }
 
     public void moveClean(Robot c) {
-        if (t[c.getX()][c.getY()].equals(Types.ROBOTANDBOMB)) {
+        if (t[c.getX()][c.getY()].equals(Types.EXPLOSION) || t[c.getX()][c.getY()].equals(Types.EXPLOSIONANDBOMB)) {
+            return;
+        } else if (t[c.getX()][c.getY()].equals(Types.ROBOTANDBOMB)) {
             t[c.getX()][c.getY()] = Types.BOMB;
         } else {
             t[c.getX()][c.getY()] = Types.NULL;
@@ -234,7 +236,9 @@ public class GameStatus {
     }
 
     public void movePlace(Robot c) {
-        if (t[c.getX()][c.getY()].equals(Types.BOMB)) {
+        if (t[c.getX()][c.getY()].equals(Types.EXPLOSION) || t[c.getX()][c.getY()].equals(Types.EXPLOSIONANDBOMB)) {
+            return;
+        } else if (t[c.getX()][c.getY()].equals(Types.BOMB)) {
             t[c.getX()][c.getY()] = Types.ROBOTANDBOMB;
         } else {
             t[c.getX()][c.getY()] = Types.ROBOT;
@@ -276,6 +280,13 @@ public class GameStatus {
             movePlace((Player) c);
             return true;
         }
+    }
+
+    // Called by the server to draw an explosion on the map
+    public void drawExplosion(Integer x, Integer y) {
+        if (t[x][y].equals(Types.BOMB))
+            t[x][y] = Types.EXPLOSIONANDBOMB;
+        else t[x][y] = Types.EXPLOSION;
     }
 
     public boolean dropBomb(Integer id) {
@@ -376,12 +387,32 @@ public class GameStatus {
 
     public void dumpBanana(Integer id, Integer xpos, Integer ypos) {
         t[xpos][ypos] = Types.PERSONANDBOMB;
-        Timer t = new Timer();
-        timers.add(t);
-        if (SERVER_MODE)
+        if (!SERVER_MODE) {
+            Timer t = new Timer();
+            timers.add(t);
             t.schedule(new BlowBombTimerTask(xpos, ypos, p.get(id), t), SettingsReader.getSettings().getExplosionTimeout() * 1000);
-        else
-            t.schedule(new BlowBombTimerTask(xpos, ypos, t), SettingsReader.getSettings().getExplosionTimeout() * 1000);
+        }
+        // else it will do in the Server class after calling this method
+    }
+
+    public void killSmelly(int killer, int killed) {
+        Player owner = p.get(killer);
+        Player owned = p.get(killed);
+        if (killed == me.getID()) {
+            thread.smellyDied();
+        } else if (killer == me.getID()) {
+            owner.increaseScore(SettingsReader.getSettings().getPointsPerPlayer());
+            t[owned.getX()][owned.getY()] = Types.NULL;
+        } else {
+            t[owned.getX()][owned.getY()] = Types.NULL;
+        }
+
+    }
+
+    public void cleanRobot(int x, int y) {
+        // simple sanity check
+        if (t[x][y] == Types.ROBOT || t[x][y] == Types.ROBOTANDBOMB)
+            t[x][y] = Types.NULL;
     }
 
     class BlowBombTimerTask extends TimerTask {
@@ -395,10 +426,6 @@ public class GameStatus {
             this.y = y;
             this.controllable = c;
             this.timer = timer;
-        }
-
-        public BlowBombTimerTask(int x, int y, Timer timer) {
-            this(x, y, null, timer);
         }
 
         public void run() {

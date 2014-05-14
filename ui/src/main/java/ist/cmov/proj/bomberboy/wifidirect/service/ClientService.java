@@ -117,6 +117,26 @@ public class ClientService extends Service {
                 Main.g.dumpBanana(id, xpos, ypos);
                 return;
             }
+            if (command.equals("killplayer")) {
+                Integer killer = Integer.parseInt(tokens[1]);
+                Integer killed = Integer.parseInt(tokens[2]);
+                Main.g.killSmelly(killer, killed);
+                return;
+            }
+            if (command.equals("suicide")) {
+
+            }
+            if (command.equals("increaseScore")) {
+                Integer points = Integer.parseInt(tokens[1]);
+                Main.g.getMe().increaseScore(points);
+                return;
+            }
+            if (command.equals("poofRobot")) {
+                Integer x = Integer.parseInt(tokens[1]);
+                Integer y = Integer.parseInt(tokens[2]);
+                Main.g.cleanRobot(x, y);
+                return;
+            }
         }
 
     }
