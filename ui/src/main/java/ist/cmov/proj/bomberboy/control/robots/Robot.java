@@ -73,10 +73,12 @@ public class Robot extends Thread implements Controllable {
             try {
                 Thread.sleep((long) SLEEPTIME);
                 Player p = getClosestPlayer();
+                if (p == null)
+                    continue;
                 Quadrant closest = Quadrant.getQuadrant(p, this);
                 Double cD = getDistance(p);
 
-                if (cD < THRESHOLD) dropBomb();
+                //if (cD < THRESHOLD) dropBomb();
 
                 if (move(closest.getMoveOne())) {
                 } else if (move(closest.getMoveTwo())) {
@@ -122,8 +124,16 @@ public class Robot extends Thread implements Controllable {
         y--;
     }
 
+    public void setX(Integer x) {
+        this.x = x;
+    }
+
+    public void setY(Integer y) {
+        this.y = y;
+    }
+
     public boolean move(Movements e) {
-        return status.move(e, id);
+        return status.getServerObject().move(e, id);
     }
 
     public boolean dropBomb() {

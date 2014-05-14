@@ -121,6 +121,14 @@ public class Player implements Controllable {
         return y;
     }
 
+    public void setX(Integer x) {
+        this.x = x;
+    }
+
+    public void setY(Integer y) {
+        this.y = y;
+    }
+
     public void interrupt() {
         kill();
     }

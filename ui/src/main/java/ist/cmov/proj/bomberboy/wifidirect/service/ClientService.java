@@ -98,10 +98,9 @@ public class ClientService extends Service {
         } else {
             if (command.equals("move")) {
                 Integer id = Integer.parseInt(tokens[1]);
-                String direction = tokens[2];
-                if (direction.equals("still"))
-                    return;
-                Main.g.moveAnotherSmelly(id, direction);
+                Integer xpos = Integer.parseInt(tokens[2]);
+                Integer ypos = Integer.parseInt(tokens[3]);
+                Main.g.moveAnotherSmelly(id, xpos, ypos);
                 return;
             }
             if (command.equals("robot")) {
@@ -112,9 +111,10 @@ public class ClientService extends Service {
                 return;
             }
             if (command.equals("banana")) {
-                Integer xpos = Integer.parseInt(tokens[1]);
-                Integer ypos = Integer.parseInt(tokens[2]);
-                Main.g.dumpBanana(xpos, ypos);
+                Integer id = Integer.parseInt(tokens[1]);
+                Integer xpos = Integer.parseInt(tokens[2]);
+                Integer ypos = Integer.parseInt(tokens[3]);
+                Main.g.dumpBanana(id, xpos, ypos);
                 return;
             }
         }

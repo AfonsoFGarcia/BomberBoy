@@ -88,9 +88,7 @@ public class GameStatus {
     }
 
     private void registerRobot(Robot robot) {
-        int rID = 10 + r.size();
-        robot.setID(rID);
-        r.put(rID, robot);
+        r.put(robot.getID(), robot);
     }
 
     private void createPlayer(Player player) {
@@ -169,11 +167,13 @@ public class GameStatus {
         for (Robot robot : settings.getRobots()) {
             registerRobot(robot);
         }
-        server = new Server((Stack<Player>) settings.getPlayers().clone(), this);
+        if (SERVER_MODE)
+            server = new Server((Stack<Player>) settings.getPlayers().clone(), r, this);
+
         GAMEOVER = false;
     }
 
-    private boolean canMove(Movements e, Controllable c) {
+    public boolean canMove(Movements e, Controllable c) {
         if (e.equals(Movements.DOWN) && c.getX() < SIZE - 1 && isNotOccupied(e, c)) {
             return true;
         } else if (e.equals(Movements.UP) && c.getX() > 0 && isNotOccupied(e, c)) {
@@ -221,7 +221,7 @@ public class GameStatus {
         }
     }
 
-    private void moveClean(Robot c) {
+    public void moveClean(Robot c) {
         if (t[c.getX()][c.getY()].equals(Types.ROBOTANDBOMB)) {
             t[c.getX()][c.getY()] = Types.BOMB;
         } else {
@@ -233,7 +233,7 @@ public class GameStatus {
         t[c.getX()][c.getY()] = Types.PERSON;
     }
 
-    private void movePlace(Robot c) {
+    public void movePlace(Robot c) {
         if (t[c.getX()][c.getY()].equals(Types.BOMB)) {
             t[c.getX()][c.getY()] = Types.ROBOTANDBOMB;
         } else {
@@ -244,24 +244,19 @@ public class GameStatus {
     public boolean move(Movements e, Integer id) {
         synchronized (lock) {
             Controllable c = null;
-            c = me;
+            c = p.get(id);
 
             if (!canMove(e, c)) return false;
-            String dir = "still";
             moveClean((Player) c);
 
             if (e.equals(Movements.DOWN)) {
                 c.incrX();
-                dir = "down";
             } else if (e.equals(Movements.UP)) {
                 c.decrX();
-                dir = "up";
             } else if (e.equals(Movements.LEFT)) {
                 c.decrY();
-                dir = "left";
             } else {
                 c.incrY();
-                dir = "right";
             }
 
             if (diedInNuclearFallout(c) && c instanceof Player) {
@@ -272,11 +267,11 @@ public class GameStatus {
 
             if (!SERVER_MODE) {
                 // update the server with the new position
-                String msg = "move " + c.getID() + " " + dir;
+                String msg = "move " + c.getID() + " " + c.getX() + " " + c.getY();
                 new ClientConnectorTask().execute(msg, host);
             } else {
                 // update all the other clients
-                server.smellMove(c.getID(), dir);
+                server.smellMove(c.getID(), c.getX(), c.getY());
             }
             movePlace((Player) c);
             return true;
@@ -285,25 +280,17 @@ public class GameStatus {
 
     public boolean dropBomb(Integer id) {
         synchronized (lock) {
-            Controllable c = null;
-
-            if (id < 5) {
-                c = p.get(id);
-            } else {
-                c = r.get(id);
-            }
+            Controllable c = p.get(id);
 
             if (!c.hasBomb()) {
-                if (c instanceof Player)
-                    t[c.getX()][c.getY()] = Types.PERSONANDBOMB;
-                else
-                    t[c.getX()][c.getY()] = Types.ROBOTANDBOMB;
-
                 c.toggleBomb();
-
-                Timer t = new Timer();
-                timers.add(t);
-                t.schedule(new BlowBombTimerTask(c.getX(), c.getY(), c, t), SettingsReader.getSettings().getExplosionTimeout() * 1000);
+                if (!SERVER_MODE) {
+                    String msg = "banana " + c.getID() + " " + c.getX() + " " + c.getY();
+                    new ClientConnectorTask().execute(msg, host);
+                    dumpBanana(c.getID(), c.getX(), c.getY());
+                } else {
+                    server.bananaDump(c.getID(), c.getX(), c.getY());
+                }
 
                 return true;
             } else {
@@ -364,45 +351,37 @@ public class GameStatus {
         Main.game.signalRedraw();
     }
 
-    public void moveAnotherSmelly(Integer id, String direction) {
+    public void moveAnotherSmelly(Integer id, Integer xpos, Integer ypos) {
         Player smelly = p.get(id);
 
         moveClean(smelly);
 
-        if (direction.equals("down")) {
-            smelly.incrX();
-        } else if (direction.equals("up")) {
-            smelly.decrX();
-        } else if (direction.equals("left")) {
-            smelly.decrY();
-        } else {
-            smelly.incrY();
-        }
+        smelly.setX(xpos);
+        smelly.setY(ypos);
         movePlace(smelly);
         Main.game.signalRedraw();
     }
 
     public void moveRobot(Integer id, Integer xpos, Integer ypos) {
         Robot robot = r.get(id);
-        int oldx = robot.getX();
-        int oldy = robot.getY();
 
-        if (oldx < xpos)
-            robot.incrX();
-        if (oldx > xpos)
-            robot.decrX();
-        if (oldy < ypos)
-            robot.incrY();
-        if (oldy > ypos)
-            robot.decrY();
+        moveClean(robot);
 
-        t[oldx][oldy] = Types.NULL;
-        t[xpos][ypos] = Types.ROBOT;
+        robot.setX(xpos);
+        robot.setY(ypos);
+
+        movePlace(robot);
         Main.game.signalRedraw();
     }
 
-    public void dumpBanana(Integer xpos, Integer ypos) {
+    public void dumpBanana(Integer id, Integer xpos, Integer ypos) {
         t[xpos][ypos] = Types.PERSONANDBOMB;
+        Timer t = new Timer();
+        timers.add(t);
+        if (SERVER_MODE)
+            t.schedule(new BlowBombTimerTask(xpos, ypos, p.get(id), t), SettingsReader.getSettings().getExplosionTimeout() * 1000);
+        else
+            t.schedule(new BlowBombTimerTask(xpos, ypos, t), SettingsReader.getSettings().getExplosionTimeout() * 1000);
     }
 
     class BlowBombTimerTask extends TimerTask {
@@ -418,14 +397,18 @@ public class GameStatus {
             this.timer = timer;
         }
 
+        public BlowBombTimerTask(int x, int y, Timer timer) {
+            this(x, y, null, timer);
+        }
+
         public void run() {
             synchronized (lock) {
                 t[x][y] = Types.EXPLOSION;
                 controllable.toggleBomb();
                 if (cleanTab(x, y)) {
-                    thread.smellyDied();
-                    cancelTimers();
-                    GAMEOVER = true;
+                    //thread.smellyDied();
+                    //cancelTimers();
+                    //GAMEOVER = true;
                 }
             }
 
@@ -442,12 +425,12 @@ public class GameStatus {
         private boolean cleanTab(int x, int y) {
             boolean returnValue = false;
 
-            returnValue = returnValue || killControllables(x, y);
+            //returnValue = returnValue || killControllables(x, y);
             t[x][y] = Types.EXPLOSION;
 
             for (int i = 1; i < RANGE; i++) {
                 if (y + i < SIZE && !t[x][y + i].equals(Types.WALL)) {
-                    returnValue = returnValue || killControllables(x, y + i);
+                    //returnValue = returnValue || killControllables(x, y + i);
                     setExplosion(x, y + i);
                 } else {
                     break;
@@ -455,7 +438,7 @@ public class GameStatus {
             }
             for (int i = 1; i < RANGE; i++) {
                 if (x + i < SIZE && !t[x + i][y].equals(Types.WALL)) {
-                    returnValue = returnValue || killControllables(x + i, y);
+                    //returnValue = returnValue || killControllables(x + i, y);
                     setExplosion(x + i, y);
                 } else {
                     break;
@@ -463,7 +446,7 @@ public class GameStatus {
             }
             for (int i = 1; i < RANGE; i++) {
                 if (y - i >= 0 && !t[x][y - i].equals(Types.WALL)) {
-                    returnValue = returnValue || killControllables(x, y - i);
+                    //returnValue = returnValue || killControllables(x, y - i);
                     setExplosion(x, y - i);
                 } else {
                     break;
@@ -471,7 +454,7 @@ public class GameStatus {
             }
             for (int i = 1; i < RANGE; i++) {
                 if (x - i >= 0 && !t[x - i][y].equals(Types.WALL)) {
-                    returnValue = returnValue || killControllables(x - i, y);
+                    //returnValue = returnValue || killControllables(x - i, y);
                     setExplosion(x - i, y);
                 } else {
                     break;

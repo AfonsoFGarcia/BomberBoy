@@ -31,5 +31,9 @@ public interface Controllable {
 
     public void decrY();
 
+    public void setX(Integer x);
+
+    public void setY(Integer y);
+
     public void increaseScore(int points);
 }
