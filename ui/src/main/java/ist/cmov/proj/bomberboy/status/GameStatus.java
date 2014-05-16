@@ -76,6 +76,7 @@ public class GameStatus {
     public GameStatus() {
         p = new HashMap<Integer, Player>();
         r = new HashMap<Integer, Robot>();
+        GAMESTARTED = false;
     }
 
     public void initializeSettings() {
@@ -153,6 +154,14 @@ public class GameStatus {
         GAMESTARTED = true;
     }
 
+    public void stop() {
+        if (SERVER_MODE) {
+            server.stop();
+            server = null;
+            endGame();
+        }
+    }
+
     private void setMap(Types[][] types) {
         t = new Types[SIZE][SIZE];
         for (int i = 0; i < SIZE; i++) {
@@ -174,7 +183,9 @@ public class GameStatus {
     }
 
     public boolean canMove(Movements e, Controllable c) {
-        if (e.equals(Movements.DOWN) && c.getX() < SIZE - 1 && isNotOccupied(e, c)) {
+        if (c.dead()) {
+            return false;
+        } else if (e.equals(Movements.DOWN) && c.getX() < SIZE - 1 && isNotOccupied(e, c)) {
             return true;
         } else if (e.equals(Movements.UP) && c.getX() > 0 && isNotOccupied(e, c)) {
             return true;
@@ -341,6 +352,7 @@ public class GameStatus {
         t[xpos][ypos] = Types.PERSON;
         p.put(id, player);
         this.me = player;
+        System.out.println("Setting main player");
         main.createPlayer(player);
     }
 
@@ -399,14 +411,19 @@ public class GameStatus {
         Player owner = p.get(killer);
         Player owned = p.get(killed);
         if (killed == me.getID()) {
+            me.interrupt();
             thread.smellyDied();
         } else if (killer == me.getID()) {
             owner.increaseScore(SettingsReader.getSettings().getPointsPerPlayer());
-            t[owned.getX()][owned.getY()] = Types.NULL;
+            t[owned.getX()][owned.getY()] = Types.EXPLOSION;
         } else {
-            t[owned.getX()][owned.getY()] = Types.NULL;
+            t[owned.getX()][owned.getY()] = Types.EXPLOSION;
         }
+    }
 
+    public void suicide() {
+        me.interrupt();
+        thread.smellyDied();
     }
 
     public void cleanRobot(int x, int y) {
@@ -453,7 +470,6 @@ public class GameStatus {
             boolean returnValue = false;
 
             //returnValue = returnValue || killControllables(x, y);
-            t[x][y] = Types.EXPLOSION;
 
             for (int i = 1; i < RANGE; i++) {
                 if (y + i < SIZE && !t[x][y + i].equals(Types.WALL)) {

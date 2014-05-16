@@ -32,6 +32,7 @@ public class ServerService extends Service {
     public static final int GROUP_OWNER_PORT = 8988;
     private ist.cmov.proj.bomberboy.wifidirect.Server server;
     private ServerSocket serverSocket;
+    private Thread thread;
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
@@ -42,7 +43,13 @@ public class ServerService extends Service {
         } catch (IOException e) {
             Log.e(TAG, "Cannot open server socket : ", e);
         }
-        new Thread(serverThread).start();
+        if (GameStatus.SERVER_MODE) {
+            // if this device is the server node
+            server = Main.g.getServerObject();
+            Log.i(TAG, "Server service started");
+        }
+        thread = new Thread(serverThread);
+        thread.start();
         Notification notification = new Notification.Builder(this)
                 .setContentTitle("BomberBoy Server")
                 .setContentText("Running")
@@ -53,31 +60,27 @@ public class ServerService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startID) {
         int DEFAULT = START_STICKY;
-        int FAIL = START_NOT_STICKY;
-
-        if (GameStatus.SERVER_MODE) {
-            // if this device is the server node
-            server = Main.g.getServerObject();
-            Log.i(TAG, "Server service with id " + startID + " : " + intent);
-            return DEFAULT;
-        } else {
-            return FAIL;
-        }
+        return DEFAULT;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         try {
+            thread.interrupt();
+            Thread.sleep(1000);
             serverSocket.close();
+            server = null;
         } catch (IOException e) {
             Log.e(TAG, "Could not close the server socket due to : " + e.getMessage(), e);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
 
     public class ServerBinder extends Binder {
-        ServerService getService() {
+        public ServerService getService() {
             return ServerService.this;
         }
     }

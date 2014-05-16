@@ -53,6 +53,10 @@ public class Player implements Controllable {
         });
     }
 
+    public void increaseScoreServer(int points) {
+        this.points += points;
+    }
+
     public Integer getScore() {
         return points;
     }
@@ -139,5 +143,9 @@ public class Player implements Controllable {
 
     public boolean dropBomb() {
         return status.dropBomb(id);
+    }
+
+    public boolean dead() {
+        return dead;
     }
 }

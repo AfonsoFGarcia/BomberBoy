@@ -119,7 +119,7 @@ public class BomberView extends SurfaceView implements SurfaceHolder.Callback {
         }
 
         public void smellyDied() {
-            status.endGame();
+            //status.endGame();
             main.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -129,12 +129,7 @@ public class BomberView extends SurfaceView implements SurfaceHolder.Callback {
 
                     alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            status = new GameStatus();
-                            status.initializeGameStatus(SettingsReader.getSettings());
-                            status.addBomberThread(getThis());
-                            main.setGameStatus(status);
-                            main.getPlayer();
-                            status.beginGame();
+
                         }
                     });
 

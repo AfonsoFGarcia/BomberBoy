@@ -36,4 +36,6 @@ public interface Controllable {
     public void setY(Integer y);
 
     public void increaseScore(int points);
+
+    public boolean dead();
 }

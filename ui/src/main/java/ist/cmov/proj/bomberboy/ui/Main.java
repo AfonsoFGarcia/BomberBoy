@@ -2,9 +2,13 @@ package ist.cmov.proj.bomberboy.ui;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -30,6 +34,9 @@ public class Main extends Activity {
     protected String playerName = null;
     public static GameStatus g;
     protected Player me = null;
+    ServerService mServer;
+    boolean mBound = false;
+    Intent i;
 
     private void getName() {
         getName("Enter your name");
@@ -191,8 +198,8 @@ public class Main extends Activity {
         });
 
         if (GameStatus.SERVER_MODE) {
-            Intent i = new Intent(getApplicationContext(), ServerService.class);
-            getApplication().startService(i);
+            i = new Intent(getApplicationContext(), ServerService.class);
+            bindService(i, mConnection, Context.BIND_AUTO_CREATE);
         } else {
             Intent i = new Intent(getApplicationContext(), ClientService.class);
             getApplication().startService(i);
@@ -266,10 +273,35 @@ public class Main extends Activity {
         }
     }
 
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            ServerService.ServerBinder binder = (ServerService.ServerBinder) service;
+            mServer = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mBound = false;
+        }
+    };
+
     @Override
     protected void onPause() {
         super.onPause();
         game.toggleRunning();
         game.invalidate();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mBound) {
+            unbindService(mConnection);
+            stopService(i);
+            mBound = false;
+        }
+        g.stop();
     }
 }

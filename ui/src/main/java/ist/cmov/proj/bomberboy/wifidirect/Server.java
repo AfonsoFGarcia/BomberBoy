@@ -53,6 +53,20 @@ public class Server {
         map = status.getMap();
     }
 
+    public void stop() {
+        cancelTimers();
+        for (Robot r : this.robots.values()) {
+            r.stopRobot();
+        }
+    }
+
+    private void cancelTimers() {
+        for (Timer timer : timers) {
+            timer.cancel();
+            timer.purge();
+        }
+    }
+
     public void smellMove(Integer id, Integer xpos, Integer ypos) {
         Player p = players.get(id);
 
@@ -85,7 +99,7 @@ public class Server {
         bm.start();
         status.dumpBanana(id, xpos, ypos);
 
-        // calling the timer task to blow the bombs and check for any deaths by bad smell
+        // calling the timer task to blow the bombs and check for any deaths by too much washing
         Timer t = new Timer();
         timers.add(t);
         t.schedule(new BlowBombTimerTaskServer(xpos, ypos, players.get(id), t), SettingsReader.getSettings().getExplosionTimeout() * 1000);
@@ -167,24 +181,36 @@ public class Server {
         String meltedURL = playersURL.get(meltedID);
         String smellyURL = playersURL.get(smellyID);
 
-        if(meltedID == smellyID) {
-            BroadcastMessage selfKill = new BroadcastMessage("suicide", meltedURL);
-            selfKill.start();
+        if (meltedID == smellyID) {
+            if (meltedID == status.getMe().getID())
+                status.suicide();
+            else {
+                BroadcastMessage selfKill = new BroadcastMessage("suicide", meltedURL);
+                selfKill.start();
+            }
         } else {
             Player death = players.get(smellyID);
             Player poorGuy = players.get(meltedID);
-            death.increaseScore(SettingsReader.getSettings().getPointsPerPlayer());
             poorGuy.interrupt();
             Collection<String> urls = new ArrayList<String>();
-            urls.add(smellyURL);
-            urls.add(meltedURL);
-            BroadcastMessage deathFlow = new BroadcastMessage("killplayer " + smellyID + " " + meltedID, urls);
+            if (smellyID != status.getMe().getID())
+                urls.add(smellyURL);
+            else
+                status.killSmelly(smellyID, meltedID);
+
+            if (meltedID != status.getMe().getID())
+                urls.add(meltedURL);
+            else
+                status.killSmelly(smellyID, meltedID);
+
+            String msg = "killplayer " + smellyID + " " + meltedID;
+            BroadcastMessage deathFlow = new BroadcastMessage(msg, urls);
             deathFlow.start();
         }
     }
 
     private void increaseScore(int smellyID) {
-        if(smellyID == status.getMe().getID()) {
+        if (smellyID == status.getMe().getID()) {
             players.get(smellyID).increaseScore(SettingsReader.getSettings().getPointsPerRobot());
         } else {
             BroadcastMessage msg = new BroadcastMessage("increaseScore " + SettingsReader.getSettings().getPointsPerRobot(),
@@ -321,7 +347,7 @@ public class Server {
                         killSmelly(c.getID(), controllable.getID());
                         returnValue = true;
                     } else {
-                        controllable.increaseScore(SettingsReader.getSettings().getPointsPerRobot());
+                        //controllable.increaseScore(SettingsReader.getSettings().getPointsPerRobot());
                         increaseScore(controllable.getID());
                         stopRobot(c.getID());
                     }

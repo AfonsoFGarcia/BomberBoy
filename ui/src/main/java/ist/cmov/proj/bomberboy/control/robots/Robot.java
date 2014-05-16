@@ -93,11 +93,11 @@ public class Robot extends Thread implements Controllable {
     }
 
     public void stopRobot() {
-        dead = true;
+        interrupt();
     }
 
     private void killRobot() {
-        this.dead = true;
+        interrupt();
     }
 
     public int getX() {
@@ -148,5 +148,12 @@ public class Robot extends Thread implements Controllable {
         bomb = !bomb;
     }
 
-    public void interrupt() { dead = true; }
+    public void interrupt() {
+        super.interrupt();
+        dead = true;
+    }
+
+    public boolean dead() {
+        return dead;
+    }
 }

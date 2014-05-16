@@ -32,11 +32,12 @@ public class ClientService extends Service {
         super.onCreate();
         try {
             clientSocket = new ServerSocket(PEER_PORT);
-        } catch(IOException e) {
+        } catch (IOException e) {
             Log.e(TAG, "Cannot open client socket : ", e);
         }
         new Thread(clientThread).start();
     }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startID) {
         int DEFAULT = START_STICKY;
@@ -93,6 +94,7 @@ public class ClientService extends Service {
                 Integer id = Integer.parseInt(tokens[1]);
                 Integer xpos = Integer.parseInt(tokens[2]);
                 Integer ypos = Integer.parseInt(tokens[3]);
+                System.out.println(id + " " + xpos + " " + ypos);
                 Main.g.ackReg(id, xpos, ypos);
             }
         } else {
@@ -124,7 +126,7 @@ public class ClientService extends Service {
                 return;
             }
             if (command.equals("suicide")) {
-
+                Main.g.suicide();
             }
             if (command.equals("increaseScore")) {
                 Integer points = Integer.parseInt(tokens[1]);
