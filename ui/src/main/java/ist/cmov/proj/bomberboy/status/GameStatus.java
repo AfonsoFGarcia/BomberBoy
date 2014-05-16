@@ -19,8 +19,8 @@ import ist.cmov.proj.bomberboy.ui.Main;
 import ist.cmov.proj.bomberboy.utils.GameSettings;
 import ist.cmov.proj.bomberboy.utils.SettingsReader;
 import ist.cmov.proj.bomberboy.utils.NetworkUtils;
-import ist.cmov.proj.bomberboy.wifidirect.connector.ClientConnectorTask;
 import ist.cmov.proj.bomberboy.wifidirect.Server;
+import ist.cmov.proj.bomberboy.wifidirect.connector.ClientMessage;
 
 public class GameStatus {
 
@@ -216,9 +216,15 @@ public class GameStatus {
         return t[x][y].equals(Types.NULL) || t[x][y].equals(Types.EXPLOSION) || t[x][y].equals(Types.EXPLOSIONANDBOMB);
     }
 
-    private boolean diedInNuclearFallout(Controllable c) {
+    private boolean diedInNuclearFallout(Controllable c, int x, int y) {
         if (t[c.getX()][c.getY()].equals(Types.EXPLOSION)) {
             c.interrupt();
+            if (SERVER_MODE)
+                server.killWashedSmelly(c.getID(), x, y);
+            else {
+                ClientMessage idied = new ClientMessage("idied " + c.getID(), host);
+                idied.start();
+            }
             return true;
         }
         return false;
@@ -261,6 +267,9 @@ public class GameStatus {
             Controllable c = null;
             c = p.get(id);
 
+            int oldx = c.getX();
+            int oldy = c.getY();
+
             if (!canMove(e, c)) return false;
             moveClean((Player) c);
 
@@ -274,7 +283,7 @@ public class GameStatus {
                 c.incrY();
             }
 
-            if (diedInNuclearFallout(c) && c instanceof Player) {
+            if (diedInNuclearFallout(c, oldx, oldy) && c instanceof Player) {
                 thread.smellyDied();
                 return true;
             }
@@ -283,7 +292,8 @@ public class GameStatus {
             if (!SERVER_MODE) {
                 // update the server with the new position
                 String msg = "move " + c.getID() + " " + c.getX() + " " + c.getY();
-                new ClientConnectorTask().execute(msg, host);
+                ClientMessage move = new ClientMessage(msg, host);
+                move.start();
             } else {
                 // update all the other clients
                 server.smellMove(c.getID(), c.getX(), c.getY());
@@ -308,7 +318,8 @@ public class GameStatus {
                 c.toggleBomb();
                 if (!SERVER_MODE) {
                     String msg = "banana " + c.getID() + " " + c.getX() + " " + c.getY();
-                    new ClientConnectorTask().execute(msg, host);
+                    ClientMessage banana = new ClientMessage(msg, host);
+                    banana.start();
                     dumpBanana(c.getID(), c.getX(), c.getY());
                 } else {
                     server.bananaDump(c.getID(), c.getX(), c.getY());
@@ -341,19 +352,20 @@ public class GameStatus {
             String msg = "register " + name;
             String host = info.groupOwnerAddress.getHostAddress();
             System.err.println(msg + " to " + host); // debug
-            new ClientConnectorTask().execute(msg, host);
+            ClientMessage register = new ClientMessage(msg, host);
+            register.start();
         }
         host = info.groupOwnerAddress.getHostAddress();
     }
 
-    public void ackReg(Integer id, int xpos, int ypos) {
+    public Player ackReg(Integer id, int xpos, int ypos) {
         // TODO: there should be a method to add the Type of the player and set the name
         Player player = new Player(id, main.getPlayerName(), xpos, ypos, this, main);
         t[xpos][ypos] = Types.PERSON;
         p.put(id, player);
         this.me = player;
-        System.out.println("Setting main player");
         main.createPlayer(player);
+        return player;
     }
 
     /**
@@ -371,6 +383,12 @@ public class GameStatus {
         Player player = new Player(id, name, xpos, ypos, this, main);
         t[xpos][ypos] = Types.PERSON;
         p.put(id, player);
+        main.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                main.setPlayerCount(p.size());
+            }
+        });
         Main.game.signalRedraw();
     }
 
@@ -421,8 +439,10 @@ public class GameStatus {
         }
     }
 
-    public void suicide() {
+    public void suicide(boolean isRobot) {
         me.interrupt();
+        if (isRobot)
+            t[me.getX()][me.getY()] = Types.NULL;
         thread.smellyDied();
     }
 
@@ -430,6 +450,14 @@ public class GameStatus {
         // simple sanity check
         if (t[x][y] == Types.ROBOT || t[x][y] == Types.ROBOTANDBOMB)
             t[x][y] = Types.NULL;
+    }
+
+    public void cleanPlayer(int x, int y) {
+        // simple sanity check
+        if (t[x][y] == Types.PERSON)
+            t[x][y] = Types.NULL;
+        else if (t[x][y] == Types.PERSONANDBOMB)
+            t[x][y] = Types.BOMB;
     }
 
     class BlowBombTimerTask extends TimerTask {

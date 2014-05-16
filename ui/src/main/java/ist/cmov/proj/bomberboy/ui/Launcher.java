@@ -1,6 +1,9 @@
 package ist.cmov.proj.bomberboy.ui;
 
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +19,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -54,6 +58,11 @@ public class Launcher extends Activity implements PlayerListFragment.DeviceActio
         setContentView(R.layout.activity_launcher);
 
         guiSetButtonListeners();
+        if (getFragmentManager().findFragmentByTag("PLF") == null) {
+            getFragmentManager().beginTransaction().add(R.id.listfrag, new PlayerListFragment(), "PLF").commit();
+        } else {
+            getFragmentManager().beginTransaction().replace(R.id.listfrag, new PlayerListFragment(), "PLF").commit();
+        }
 
         mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         mChannel = mManager.initialize(this, getMainLooper(), null);
@@ -70,8 +79,7 @@ public class Launcher extends Activity implements PlayerListFragment.DeviceActio
     private View.OnClickListener listenerStartGameButton = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            Intent i = new Intent(getApplicationContext(), Main.class);
-            startActivity(i);
+            getFragmentManager().beginTransaction().replace(R.id.listfrag, new LevelListFragment()).commit();
         }
     };
 
@@ -90,8 +98,8 @@ public class Launcher extends Activity implements PlayerListFragment.DeviceActio
                         Toast.LENGTH_SHORT).show();
                 return;
             }
-            final PlayerListFragment fragment = (PlayerListFragment) getFragmentManager()
-                    .findFragmentById(R.id.player_list_frag);
+
+            final PlayerListFragment fragment = (PlayerListFragment) getFragmentManager().findFragmentByTag("PLF");
             fragment.onInitiateDiscovery();
             mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
                 @Override
@@ -135,8 +143,7 @@ public class Launcher extends Activity implements PlayerListFragment.DeviceActio
             // owner.
             GameStatus.SERVER_MODE = false;
             GameStatus.info = info;
-            PlayerListFragment fragment = (PlayerListFragment) getFragmentManager()
-                    .findFragmentById(R.id.player_list_frag);
+            PlayerListFragment fragment = (PlayerListFragment) getFragmentManager().findFragmentByTag("PLF");
             GameStatus.device = fragment.getDevice();
             Toast.makeText(getApplicationContext(), "I'm just a peer", Toast.LENGTH_SHORT).show();
         }
@@ -161,8 +168,7 @@ public class Launcher extends Activity implements PlayerListFragment.DeviceActio
     }
 
     public void resetData() {
-        PlayerListFragment fragmentList = (PlayerListFragment) getFragmentManager()
-                .findFragmentById(R.id.player_list_frag);
+        PlayerListFragment fragmentList = (PlayerListFragment) getFragmentManager().findFragmentByTag("PLF");
         if (fragmentList != null) {
             fragmentList.clearPeers();
         }

@@ -26,6 +26,7 @@ public class ClientService extends Service {
     public static final String TAG = "SERVERSERVICE";
     public static final int PEER_PORT = 8989;
     private ServerSocket clientSocket;
+    private Thread thread;
 
     @Override
     public void onCreate() {
@@ -35,7 +36,8 @@ public class ClientService extends Service {
         } catch (IOException e) {
             Log.e(TAG, "Cannot open client socket : ", e);
         }
-        new Thread(clientThread).start();
+        thread = new Thread(clientThread);
+        thread.start();
     }
 
     @Override
@@ -56,29 +58,51 @@ public class ClientService extends Service {
     public void onDestroy() {
         super.onDestroy();
         try {
+            thread.interrupt();
+            Thread.sleep(1000);
             clientSocket.close();
         } catch (IOException e) {
             Log.e(TAG, "Could not close the client socket due to : " + e.getMessage(), e);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
 
-    public class ServerBinder extends Binder {
-        ClientService getService() {
+    public class ClientBinder extends Binder {
+        public ClientService getService() {
             return ClientService.this;
         }
     }
 
-    private final IBinder mBinder = new ServerBinder();
+    private final IBinder mBinder = new ClientBinder();
 
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
 
+    @Override
+    public boolean onUnbind(Intent i) {
+        try {
+            thread.interrupt();
+            Thread.sleep(1000);
+            clientSocket.close();
+        } catch (IOException e) {
+            Log.e(TAG, "Could not close the client socket due to : " + e.getMessage(), e);
+            return false;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
     private void parseMsg(String m) {
         String[] tokens = m.split("\\s+");
         String command = tokens[0];
+        if (Main.g == null)
+            return;
 
         if (command.equals("newplayer")) {
             Integer id = Integer.parseInt(tokens[1]);
@@ -126,7 +150,9 @@ public class ClientService extends Service {
                 return;
             }
             if (command.equals("suicide")) {
-                Main.g.suicide();
+                Boolean b = Boolean.parseBoolean(tokens[1]);
+                Main.g.suicide(b);
+                return;
             }
             if (command.equals("increaseScore")) {
                 Integer points = Integer.parseInt(tokens[1]);
@@ -139,6 +165,12 @@ public class ClientService extends Service {
                 Main.g.cleanRobot(x, y);
                 return;
             }
+            if (command.equals("playerdied")) {
+                Integer x = Integer.parseInt(tokens[1]);
+                Integer y = Integer.parseInt(tokens[2]);
+                Main.g.cleanPlayer(x, y);
+            }
+
         }
 
     }

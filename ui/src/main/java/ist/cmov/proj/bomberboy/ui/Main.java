@@ -15,8 +15,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.apache.http.conn.ClientConnectionManager;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.nio.Buffer;
 
 import ist.cmov.proj.bomberboy.control.players.Player;
 import ist.cmov.proj.bomberboy.status.GameStatus;
@@ -35,7 +38,9 @@ public class Main extends Activity {
     public static GameStatus g;
     protected Player me = null;
     ServerService mServer;
-    boolean mBound = false;
+    ClientService mClient;
+    boolean mBoundServer = false;
+    boolean mBoundClient = false;
     Intent i;
 
     private void getName() {
@@ -95,12 +100,6 @@ public class Main extends Activity {
         game.toggleRunning();
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        finish();
-    }
-
     public void register(String name) {
         g.register(name, this);
     }
@@ -125,13 +124,14 @@ public class Main extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        Integer level = getIntent().getExtras().getInt("LEVEL", R.raw.l1);
         setContentView(R.layout.activity_main);
         game = (BomberView) findViewById(R.id.gameView);
 
         g = new GameStatus();
-
-        BufferedReader l = new BufferedReader(new InputStreamReader(getResources().openRawResource(R.raw.l1)));
+        BufferedReader l = null;
+        if (level == R.raw.l1)
+            l = new BufferedReader(new InputStreamReader(getResources().openRawResource(R.raw.l1)));
 
         try {
             SettingsReader.readSettings(l, g, this);
@@ -199,13 +199,18 @@ public class Main extends Activity {
 
         if (GameStatus.SERVER_MODE) {
             i = new Intent(getApplicationContext(), ServerService.class);
-            bindService(i, mConnection, Context.BIND_AUTO_CREATE);
+            bindService(i, mConnectionServer, Context.BIND_AUTO_CREATE);
         } else {
-            Intent i = new Intent(getApplicationContext(), ClientService.class);
-            getApplication().startService(i);
+            i = new Intent(getApplicationContext(), ClientService.class);
+            bindService(i, mConnectionClient, Context.BIND_AUTO_CREATE);
         }
         getPlayer();
 
+    }
+
+    public void setPlayerCount(int count) {
+        TextView text = (TextView) findViewById(R.id.numberPlayers);
+        text.setText(new Integer(count).toString());
     }
 
     @Override
@@ -233,6 +238,12 @@ public class Main extends Activity {
 
         // Scale our contents
         scaleViewAndChildren(rootView, scale);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent i = new Intent(this, Launcher.class);
+        startActivity(i);
     }
 
     public static void scaleViewAndChildren(View root, float scale) {
@@ -273,17 +284,31 @@ public class Main extends Activity {
         }
     }
 
-    private ServiceConnection mConnection = new ServiceConnection() {
+    private ServiceConnection mConnectionServer = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             ServerService.ServerBinder binder = (ServerService.ServerBinder) service;
             mServer = binder.getService();
-            mBound = true;
+            mBoundServer = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            mBound = false;
+            mBoundServer = false;
+        }
+    };
+
+    private ServiceConnection mConnectionClient = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            ClientService.ClientBinder binder = (ClientService.ClientBinder) iBinder;
+            mClient = binder.getService();
+            mBoundClient = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mBoundClient = false;
         }
     };
 
@@ -295,13 +320,20 @@ public class Main extends Activity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (mBound) {
-            unbindService(mConnection);
+    protected void onStop() {
+        super.onStop();
+        if (mBoundServer) {
+            unbindService(mConnectionServer);
             stopService(i);
-            mBound = false;
+            mBoundServer = false;
+        }
+        if (mBoundClient) {
+            unbindService(mConnectionClient);
+            stopService(i);
+            mBoundClient = false;
         }
         g.stop();
+        g = null;
+        finish();
     }
 }

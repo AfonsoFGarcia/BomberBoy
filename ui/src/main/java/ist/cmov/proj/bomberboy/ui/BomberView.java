@@ -39,6 +39,7 @@ public class BomberView extends SurfaceView implements SurfaceHolder.Callback {
         GameStatus status;
         Context context;
         HashMap<Types, Bitmap> bitmaps;
+        private boolean dead = false;
         float bitSize;
         int size;
 
@@ -119,23 +120,25 @@ public class BomberView extends SurfaceView implements SurfaceHolder.Callback {
         }
 
         public void smellyDied() {
-            //status.endGame();
-            main.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    AlertDialog.Builder alert = new AlertDialog.Builder(main, AlertDialog.THEME_HOLO_LIGHT);
-                    alert.setCancelable(false);
-                    alert.setTitle("You died!");
+            if (!dead) {
+                main.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        AlertDialog.Builder alert = new AlertDialog.Builder(main, AlertDialog.THEME_HOLO_LIGHT);
+                        alert.setCancelable(false);
+                        alert.setTitle("You died!");
 
-                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
+                        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
 
-                        }
-                    });
+                            }
+                        });
 
-                    alert.show();
-                }
-            });
+                        alert.show();
+                    }
+                });
+            }
+            dead = true;
         }
 
         public void updateClock(long millis) {

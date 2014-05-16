@@ -54,14 +54,12 @@ public class WifiDirectBroadcastReceiver extends BroadcastReceiver {
         } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
             // update activity with the new peers using WifiP2pManager.requestPeers()
             if (mManager != null) {
-                mManager.requestPeers(mChannel, (WifiP2pManager.PeerListListener) activity.getFragmentManager()
-                        .findFragmentById(R.id.player_list_frag));
+                mManager.requestPeers(mChannel, (WifiP2pManager.PeerListListener) activity.getFragmentManager().findFragmentByTag("PLF"));
             }
 
         } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
             // Respond to this device's wifi state changing
-            PlayerListFragment fragment = (PlayerListFragment) activity.getFragmentManager()
-                    .findFragmentById(R.id.player_list_frag);
+            PlayerListFragment fragment = (PlayerListFragment) activity.getFragmentManager().findFragmentByTag("PLF");
             fragment.updateThisDevice((WifiP2pDevice) intent.getParcelableExtra(
                     WifiP2pManager.EXTRA_WIFI_P2P_DEVICE));
 

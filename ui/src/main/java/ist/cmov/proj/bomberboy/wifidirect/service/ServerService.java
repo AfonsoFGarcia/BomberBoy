@@ -18,6 +18,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import ist.cmov.proj.bomberboy.control.players.Player;
 import ist.cmov.proj.bomberboy.status.GameStatus;
 import ist.cmov.proj.bomberboy.ui.Main;
 import ist.cmov.proj.bomberboy.ui.R;
@@ -104,6 +105,8 @@ public class ServerService extends Service {
 
         if (command.equals("banana"))
             updateBanana(tokens);
+        if (command.equals("idied"))
+            killPlayer(tokens);
     }
 
     private void joinGame(String[] params) {
@@ -141,6 +144,12 @@ public class ServerService extends Service {
         } catch (NullPointerException npe) {
             System.err.println("NullPointerException: " + npe.getMessage());
         }
+    }
+
+    private void killPlayer(String[] params) {
+        Integer id = Integer.parseInt(params[1]);
+        Player p = server.getPlayer(id);
+        server.killWashedSmelly(id, p.getX(), p.getY());
     }
 
     private Runnable serverThread = new Runnable() {

@@ -19,6 +19,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name="ist.cmov.proj.bomberboy.ui.Main"
+            android:noHistory="true"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
@@ -30,6 +31,7 @@
         <activity
             android:name="ist.cmov.proj.bomberboy.ui.Launcher"
             android:label="@string/app_name"
+            android:noHistory="true"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

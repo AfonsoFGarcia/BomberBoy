@@ -51,17 +51,11 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/listfrag"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <fragment
-                class="ist.cmov.proj.bomberboy.wifidirect.PlayerListFragment"
-                android:id="@+id/player_list_frag"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/phone_list_height">
-
-            </fragment>
 
         </LinearLayout>
 

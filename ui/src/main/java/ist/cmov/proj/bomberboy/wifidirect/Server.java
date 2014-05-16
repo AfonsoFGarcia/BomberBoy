@@ -19,6 +19,7 @@ import ist.cmov.proj.bomberboy.status.Types;
 import ist.cmov.proj.bomberboy.utils.NetworkUtils;
 import ist.cmov.proj.bomberboy.utils.SettingsReader;
 import ist.cmov.proj.bomberboy.wifidirect.connector.BroadcastMessage;
+import ist.cmov.proj.bomberboy.wifidirect.connector.ClientMessage;
 import ist.cmov.proj.bomberboy.wifidirect.connector.ServerConnectorTask;
 
 /**
@@ -105,6 +106,10 @@ public class Server {
         t.schedule(new BlowBombTimerTaskServer(xpos, ypos, players.get(id), t), SettingsReader.getSettings().getExplosionTimeout() * 1000);
     }
 
+    public Player getPlayer(Integer id) {
+        return players.get(id);
+    }
+
     public boolean addPlayer(String name, String url) {
         if (!playerStack.empty()) {
             Player p = playerStack.pop();
@@ -160,8 +165,7 @@ public class Server {
             // placeholder message for the server
             Log.i(TAG, "Player " + name + " joined a new game, with ID: " + id + "\nand url " + url);
 
-            status.ackReg(id, p.getX(), p.getY());
-            players.put(id, p);
+            players.put(id, status.ackReg(id, p.getX(), p.getY()));
             status.updatePlayers(players); // adds a reference to the status for the server players
             return true;
         }
@@ -183,13 +187,12 @@ public class Server {
 
         if (meltedID == smellyID) {
             if (meltedID == status.getMe().getID())
-                status.suicide();
+                status.suicide(false);
             else {
-                BroadcastMessage selfKill = new BroadcastMessage("suicide", meltedURL);
+                BroadcastMessage selfKill = new BroadcastMessage("suicide false", meltedURL);
                 selfKill.start();
             }
         } else {
-            Player death = players.get(smellyID);
             Player poorGuy = players.get(meltedID);
             poorGuy.interrupt();
             Collection<String> urls = new ArrayList<String>();
@@ -234,6 +237,9 @@ public class Server {
 
             if (!status.canMove(e, r)) return false;
 
+            int oldx = r.getX();
+            int oldy = r.getY();
+
             status.moveClean(r);
             if (e.equals(Movements.DOWN)) {
                 r.incrX();
@@ -244,13 +250,55 @@ public class Server {
             } else {
                 r.incrY();
             }
+            if (diedInNuclearFallout(r, oldx, oldy)) {
+                return true;
+            }
+
             status.movePlace(r);
+
             String msg = "robot " + r.getID() + " " + r.getX() + " " + r.getY();
             BroadcastMessage bm = new BroadcastMessage(msg, peers);
             bm.start();
-
+            checkKillSmelly(r.getX(), r.getY());
             return true;
         }
+    }
+
+    private boolean diedInNuclearFallout(Controllable c, int x, int y) {
+        if (map[c.getX()][c.getY()].equals(Types.EXPLOSION)) {
+            c.interrupt();
+            BroadcastMessage msg = new BroadcastMessage("poofRobot " + x + " " + y, peers);
+            msg.start();
+            return true;
+        }
+        return false;
+    }
+
+    public void killWashedSmelly(Integer id, int x, int y) {
+        Player smelly = players.get(id);
+        status.cleanPlayer(smelly.getX(), smelly.getY());
+        BroadcastMessage robotKilled = new BroadcastMessage("playerdied " + x + " " + y, peers);
+        robotKilled.start();
+    }
+
+    private void checkKillSmelly(int x, int y) {
+        for (Player p : players.values()) {
+            if (getDistance(p, x, y) == 1) {
+                if (p.getID() == status.getMe().getID()) {
+                    status.suicide(true);
+                } else {
+                    BroadcastMessage selfKill = new BroadcastMessage("suicide true", p.getUrl());
+                    selfKill.start();
+                    status.cleanPlayer(p.getX(), p.getY());
+                }
+                BroadcastMessage robotKilled = new BroadcastMessage("playerdied " + p.getX() + " " + p.getY(), peers);
+                robotKilled.start();
+            }
+        }
+    }
+
+    private Double getDistance(Player p, int x, int y) {
+        return Math.abs(Math.sqrt(Math.pow(p.getX() - x, 2) + Math.pow(p.getY() - y, 2)));
     }
 
     /**
