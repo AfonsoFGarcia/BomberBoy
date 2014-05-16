@@ -3,6 +3,7 @@ package ist.cmov.proj.bomberboy.ui;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -27,7 +28,7 @@ public class BomberView extends SurfaceView implements SurfaceHolder.Callback {
     private boolean running = false;
     private boolean started = false;
     private boolean scaled = false;
-    private long timeLeft;
+    public static long timeLeft;
     private int SIZE = 1064;
     protected Main main;
 
@@ -164,12 +165,7 @@ public class BomberView extends SurfaceView implements SurfaceHolder.Callback {
 
                     alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            status = new GameStatus();
-                            status.initializeGameStatus(SettingsReader.getSettings());
-                            status.addBomberThread(getThis());
-                            main.setGameStatus(status);
-                            main.getPlayer();
-                            status.beginGame();
+                            main.onBackPressed();
                         }
                     });
 

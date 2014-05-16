@@ -132,6 +132,12 @@ public class Main extends Activity {
         BufferedReader l = null;
         if (level == R.raw.l1)
             l = new BufferedReader(new InputStreamReader(getResources().openRawResource(R.raw.l1)));
+        if (level == R.raw.l1_demo)
+            l = new BufferedReader(new InputStreamReader(getResources().openRawResource(R.raw.l1_demo)));
+        if (level == R.raw.l2_demo)
+            l = new BufferedReader(new InputStreamReader(getResources().openRawResource(R.raw.l2_demo)));
+        if (level == R.raw.l3_demo)
+            l = new BufferedReader(new InputStreamReader(getResources().openRawResource(R.raw.l3_demo)));
 
         try {
             SettingsReader.readSettings(l, g, this);
@@ -333,7 +339,5 @@ public class Main extends Activity {
             mBoundClient = false;
         }
         g.stop();
-        g = null;
-        finish();
     }
 }

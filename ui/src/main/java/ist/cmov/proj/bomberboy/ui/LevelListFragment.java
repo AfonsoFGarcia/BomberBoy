@@ -34,6 +34,9 @@ public class LevelListFragment extends ListFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         levels.add(R.raw.l1);
+        levels.add(R.raw.l1_demo);
+        levels.add(R.raw.l2_demo);
+        levels.add(R.raw.l3_demo);
         this.setListAdapter(new LevelListAdapter(getActivity(), R.layout.row_level, levels));
 
     }
@@ -88,7 +91,20 @@ public class LevelListFragment extends ListFragment {
                 TextView top;
                 if (level == R.raw.l1) {
                     top = (TextView) v.findViewById(R.id.level_name);
-                    top.setText("Our level");
+                    top.setText("Our Level");
+                }
+                if (level == R.raw.l1_demo) {
+                    top = (TextView) v.findViewById(R.id.level_name);
+                    top.setText("Demo Level 1");
+                }
+                if (level == R.raw.l2_demo) {
+                    top = (TextView) v.findViewById(R.id.level_name);
+                    top.setText("Demo Level 2");
+
+                }
+                if (level == R.raw.l3_demo) {
+                    top = (TextView) v.findViewById(R.id.level_name);
+                    top.setText("Demo Level 3");
                 }
             }
             return v;

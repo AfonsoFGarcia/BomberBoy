@@ -16,6 +16,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import ist.cmov.proj.bomberboy.status.GameStatus;
+import ist.cmov.proj.bomberboy.ui.BomberView;
 import ist.cmov.proj.bomberboy.ui.Main;
 
 /**
@@ -118,7 +119,9 @@ public class ClientService extends Service {
                 Integer id = Integer.parseInt(tokens[1]);
                 Integer xpos = Integer.parseInt(tokens[2]);
                 Integer ypos = Integer.parseInt(tokens[3]);
+                Integer timeleft = Integer.parseInt(tokens[4]);
                 System.out.println(id + " " + xpos + " " + ypos);
+                BomberView.timeLeft = timeleft;
                 Main.g.ackReg(id, xpos, ypos);
             }
         } else {

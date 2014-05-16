@@ -81,8 +81,8 @@ public class GameStatus {
 
     public void initializeSettings() {
         RANGE = SettingsReader.getSettings().getExplosionRange();
-        TIMETOBLOW = SettingsReader.getSettings().getExplosionTimeout() * 1000;
-        TIMEOFBLOW = SettingsReader.getSettings().getExplosionDuration() * 1000;
+        TIMETOBLOW = SettingsReader.getSettings().getExplosionTimeout();
+        TIMEOFBLOW = SettingsReader.getSettings().getExplosionDuration();
         for (Robot robot : r.values()) {
             robot.initializeSettings();
         }
@@ -139,8 +139,13 @@ public class GameStatus {
             }
         }
 
-        t.schedule(new EndGame(), SettingsReader.getSettings().getGameDuration() * 1000);
-        thread.updateClock(SettingsReader.getSettings().getGameDuration() * 1000);
+
+        if (SERVER_MODE)
+            thread.updateClock(SettingsReader.getSettings().getGameDuration());
+        else
+            thread.updateClock(BomberView.timeLeft);
+
+        t.schedule(new EndGame(), BomberView.timeLeft);
 
         class UpdateTime extends TimerTask {
             public void run() {
@@ -420,7 +425,7 @@ public class GameStatus {
         if (!SERVER_MODE) {
             Timer t = new Timer();
             timers.add(t);
-            t.schedule(new BlowBombTimerTask(xpos, ypos, p.get(id), t), SettingsReader.getSettings().getExplosionTimeout() * 1000);
+            t.schedule(new BlowBombTimerTask(xpos, ypos, p.get(id), t), SettingsReader.getSettings().getExplosionTimeout());
         }
         // else it will do in the Server class after calling this method
     }
@@ -490,7 +495,7 @@ public class GameStatus {
             if (!GAMEOVER) {
                 Timer t = new Timer();
                 timers.add(t);
-                t.schedule(new CleanBombTimerTask(x, y, t), SettingsReader.getSettings().getExplosionDuration() * 1000);
+                t.schedule(new CleanBombTimerTask(x, y, t), SettingsReader.getSettings().getExplosionDuration());
             }
         }
 

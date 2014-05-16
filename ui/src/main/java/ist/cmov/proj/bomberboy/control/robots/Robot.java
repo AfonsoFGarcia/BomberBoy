@@ -34,7 +34,7 @@ public class Robot extends Thread implements Controllable {
     }
 
     public void initializeSettings() {
-        SLEEPTIME = (1 / SettingsReader.getSettings().getRobotSpeed()) * 1000;
+        SLEEPTIME = (1000 / SettingsReader.getSettings().getRobotSpeed()) * 1000;
     }
 
     public void setID(Integer id) {
@@ -69,8 +69,9 @@ public class Robot extends Thread implements Controllable {
 
     @Override
     public void run() {
-        while (!dead) {
-            try {
+        try {
+            while (!dead) {
+
                 Thread.sleep((long) SLEEPTIME);
                 Player p = getClosestPlayer();
                 if (p == null)
@@ -86,9 +87,10 @@ public class Robot extends Thread implements Controllable {
                 } else {
                     move(closest.getMoveFour());
                 }
-            } catch (InterruptedException e) {
-                killRobot();
+
             }
+        } catch (Exception e) {
+            killRobot();
         }
     }
 

@@ -16,6 +16,7 @@ import ist.cmov.proj.bomberboy.control.robots.Robot;
 import ist.cmov.proj.bomberboy.status.GameStatus;
 import ist.cmov.proj.bomberboy.status.Movements;
 import ist.cmov.proj.bomberboy.status.Types;
+import ist.cmov.proj.bomberboy.ui.BomberView;
 import ist.cmov.proj.bomberboy.utils.NetworkUtils;
 import ist.cmov.proj.bomberboy.utils.SettingsReader;
 import ist.cmov.proj.bomberboy.wifidirect.connector.BroadcastMessage;
@@ -103,7 +104,7 @@ public class Server {
         // calling the timer task to blow the bombs and check for any deaths by too much washing
         Timer t = new Timer();
         timers.add(t);
-        t.schedule(new BlowBombTimerTaskServer(xpos, ypos, players.get(id), t), SettingsReader.getSettings().getExplosionTimeout() * 1000);
+        t.schedule(new BlowBombTimerTaskServer(xpos, ypos, players.get(id), t), SettingsReader.getSettings().getExplosionTimeout());
     }
 
     public Player getPlayer(Integer id) {
@@ -122,7 +123,7 @@ public class Server {
             Log.i(TAG, "Player " + name + " joined a new game, with ID: " + id + "\nand url " + url);
 
             // inform the player (ack register) we added him with pair (id, pos)
-            String msg = "ackReg " + id + " " + p.getX() + " " + p.getY();
+            String msg = "ackReg " + id + " " + p.getX() + " " + p.getY() + " " + BomberView.timeLeft;
             ServerConnectorTask inform = new ServerConnectorTask();
             inform.execute(msg, url);
 
@@ -336,7 +337,7 @@ public class Server {
             if (!GAMEOVER) {
                 Timer t = new Timer();
                 timers.add(t);
-                t.schedule(new CleanBombTimerTask(x, y, t), SettingsReader.getSettings().getExplosionDuration() * 1000);
+                t.schedule(new CleanBombTimerTask(x, y, t), SettingsReader.getSettings().getExplosionDuration());
             }
         }
 
